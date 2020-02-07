@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white_background"
+    android:layout_height="@dimen/_50sdp">
+
+    <ImageView
+        android:layout_width="@dimen/_30sdp"
+        android:layout_height="@dimen/_30sdp"
+        android:id="@+id/userProfileImage"
+        android:layout_marginLeft="@dimen/_15sdp"
+        android:layout_centerVertical="true"
+        android:src="@drawable/userimage"
+        android:layout_marginRight="@dimen/_10sdp"
+        ></ImageView>
+
+    <com.aeropay_merchant.view.AP_SDK_CustomTextView
+        android:layout_width="@dimen/_70sdp"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/_14ssp"
+        android:textColor="#232323"
+        app:ctypeface="@string/adineue_pro_bold"
+        android:id="@+id/payerName"
+        android:gravity="center"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/userProfileImage"
+        android:text="Tanner Van Dera"
+        />
+
+    <ImageView
+        android:id="@+id/statusImage"
+        android:layout_width="@dimen/_18sdp"
+        android:layout_height="@dimen/_18sdp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/_10sdp"
+        android:layout_marginRight="@dimen/_15sdp"
+        android:src="@drawable/completed"></ImageView>
+
+    <com.aeropay_merchant.view.AP_SDK_CustomTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/_14ssp"
+        android:textColor="#adadad"
+        app:ctypeface="@string/adineue_pro_bold"
+        android:id="@+id/timeLeftText"
+        android:layout_toLeftOf="@id/statusImage"
+        android:layout_centerVertical="true"
+        android:text="00:00"
+        />
+
+    <com.aeropay_merchant.view.AP_SDK_CustomTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/_14ssp"
+        android:textColor="#000000"
+        app:ctypeface="@string/adineue_pro_bold"
+        android:id="@+id/moneyText"
+        android:layout_toLeftOf="@id/timeLeftText"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="@dimen/_15sdp"
+        android:text="$5.25"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_1sdp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/textview_color"></View>
+
+</RelativeLayout>

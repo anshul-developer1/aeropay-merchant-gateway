@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -18,42 +20,43 @@
     <application
         android:allowBackup="true"
         android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.BeaconActivity"></activity>
+        <activity android:name=".activity.AP_SDK_BeaconActivity"></activity>
 
         <service android:name="org.eclipse.paho.android.service.MqttService" />
 
-        <service android:name=".Utilities.MyFirebaseMessagingService">
+        <service android:name=".Utilities.AP_SDK_MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
-        <activity android:name=".activity.PinEnterActivity" />
+        <activity android:name=".activity.AP_SDK_PinEnterActivity" />
 
         <activity
-            android:name=".activity.HomeActivity"
+            android:name=".activity.AP_SDK_HomeActivity"
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|screenSize"/>
-        <activity android:name=".activity.FastLoginActivity" />
+        <activity android:name=".activity.AP_SDK_FastLoginActivity" />
 
         <activity
-            android:name=".activity.SettingsScreenActivity"
+            android:name=".activity.AP_SDK_SettingsScreenActivity"
             android:configChanges="orientation|screenSize|keyboardHidden" />
 
-        <activity android:name=".activity.NavigationMenuActivity" />
+        <activity android:name=".activity.AP_SDK_NavigationMenuActivity" />
 
         <activity
             android:name=".activity.BaseActivity"
             android:configChanges="orientation|screenSize|keyboardHidden" />
 
-        <activity android:name=".activity.SignInCredentialActivity" />
+        <activity android:name=".activity.AP_SDK_SignInCredentialActivity" />
 
-        <activity android:name=".activity.SignInScreenActivity" />
+        <activity android:name=".activity.AP_SDK_SignInScreenActivity" />
 
-        <activity android:name=".activity.SplashActivity">
+        <activity android:name=".activity.AP_SDK_SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
