@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.aeropay_merchant.Model.AP_SDK_CreateSyncPayload
 import com.aeropay_merchant.R
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.ap_sdk_home_recycler_layout.view.*
 
 
@@ -37,7 +38,7 @@ class HomeListRecyclerView(val payerName: MutableList<AP_SDK_CreateSyncPayload>,
         else if(transactionStatus.equals("cancelled")){
             holder?.status?.setImageResource(R.drawable.bitmap)
         }
-        Glide.with(context).load(profileImageUrl).into(holder?.payerImage)
+        Glide.with(context).load(profileImageUrl).apply(RequestOptions.circleCropTransform()).into(holder?.payerImage)
     }
 }
 

@@ -10,7 +10,6 @@
     <ScrollView
         android:layout_width="match_parent"
         android:fillViewport="true"
-        android:overScrollMode="always"
         android:layout_height="match_parent">
 
         <RelativeLayout
@@ -116,6 +115,7 @@
 
             <RelativeLayout android:layout_width="match_parent"
                 android:layout_height="@dimen/_45sdp"
+                android:layout_marginBottom="@dimen/_20sdp"
                 android:layout_below="@id/autoLoginLayout"
                 android:id="@+id/pinLoginLayout">
 
@@ -178,24 +178,20 @@
 
     </RelativeLayout>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_below="@id/listLAyout"
-            android:layout_marginTop="@dimen/_30sdp"
-            android:layout_marginBottom="@dimen/_20sdp"
-            android:layout_height="wrap_content">
-
-            <Button
-                android:layout_width="match_parent"
+            <ImageView
+                android:layout_width="@dimen/_250sdp"
                 android:layout_height="@dimen/_40sdp"
                 android:id="@+id/saveButton"
                 android:onClick="onSaveButtonClick"
+                android:layout_marginBottom="@dimen/_20sdp"
+                android:adjustViewBounds="true"
+                android:layout_centerHorizontal="true"
                 android:layout_alignParentBottom="true"
-                android:layout_marginRight="@dimen/_30sdp"
-                android:layout_marginLeft="@dimen/_30sdp"
+                android:layout_marginRight="@dimen/_40sdp"
+                android:layout_marginLeft="@dimen/_40sdp"
                 android:background="@drawable/save_button">
-            </Button>
-        </RelativeLayout>
+            </ImageView>
+
         </RelativeLayout>
     </ScrollView>
 

@@ -84,8 +84,8 @@ class AP_SDK_AWSConnectionManager  {
                         callbackHandlerAPSDK.onSuccess(requestID)
                     }
                     else{
-                        callbackHandlerAPSDK.onFailure(requestID)
-                    }
+                        var errorMessage = output.error.toString()
+                        callbackHandlerAPSDK.onFailure(requestID, errorMessage)                    }
                 }
                 else if(requestID.equals(AP_SDK_DefineID().FETCH_MERCHANT_LOCATIONS)){
                     var output = result as MerchantLocationsResponse
@@ -97,7 +97,7 @@ class AP_SDK_AWSConnectionManager  {
                         callbackHandlerAPSDK.onSuccess(requestID)
                     }
                     else{
-                        callbackHandlerAPSDK.onFailure(requestID)
+                        callbackHandlerAPSDK.onFailure(requestID,"API Failure")
                     }
                 }
                 else if(requestID.equals(AP_SDK_DefineID().FETCH_MERCHANT_DEVICES)){
@@ -110,7 +110,7 @@ class AP_SDK_AWSConnectionManager  {
                         callbackHandlerAPSDK.onSuccess(requestID)
                     }
                     else{
-                        callbackHandlerAPSDK.onFailure(requestID)
+                        callbackHandlerAPSDK.onFailure(requestID,"API Failure")
                     }
                 }
                 else if(requestID.equals(AP_SDK_DefineID().REGISTER_MERCHANT_LOCATION_DEVICE)){
@@ -123,19 +123,18 @@ class AP_SDK_AWSConnectionManager  {
                         callbackHandlerAPSDK.onSuccess(requestID)
                     }
                     else{
-                        callbackHandlerAPSDK.onFailure(requestID)
-                    }
+                        var errorMessage = output.error.toString()
+                        callbackHandlerAPSDK.onFailure(requestID, errorMessage)                    }
                 }
                 else if(requestID.equals(AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION)){
                     var output = result as StandardResponse
                     var statusCode = output.success.toString()
                     if(statusCode.equals("1")){
-                        var stringOutput = Gson().toJson(output)
-                       // objModelManagerAPSDK.APSDKRegisterMerchantDevices = Gson().fromJson(stringOutput, com.aeropay_merchant.Model.AP_SDK_RegisterMerchantDeviceResponse::class.java)
                         callbackHandlerAPSDK.onSuccess(requestID)
                     }
                     else{
-                        callbackHandlerAPSDK.onFailure(requestID)
+                        var errorMessage = output.error.toString()
+                        callbackHandlerAPSDK.onFailure(requestID, errorMessage)
                     }
                 }
                 unlockScreenOrientation()

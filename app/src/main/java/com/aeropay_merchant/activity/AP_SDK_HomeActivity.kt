@@ -35,6 +35,7 @@ import com.amazonaws.mobileconnectors.appsync.AppSyncSubscriptionCall
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.earthling.atminput.ATMEditText
 import com.earthling.atminput.Currency
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -62,17 +63,14 @@ class AP_SDK_HomeActivity : BaseActivity(){
     var selectedPosition : Int? = -1
     val TAG = AP_SDK_SignInScreenActivity::class.java!!.getSimpleName()
     var objModelManager = AP_SDK_AeropayModelManager().getInstance()
-   /* var count : Int? = 0
-    var listCount : Int? = 0*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         APSDKHomeViewModel = AP_SDK_HomeViewModel()
         setContentView(com.aeropay_merchant.R.layout.ap_sdk_activity_home)
-        initialiseControls()
-
         objModelManager.APSDKSubscriptionPayloadForList.payloadList = mutableListOf()
         objModelManager.createSyncPayloadAPSDK.payloadList = mutableListOf()
+        initialiseControls()
         saveMerchantId()
         AP_SDK_GlobalMethods().getDeviceToken(applicationContext)
         setListeners()
@@ -86,6 +84,29 @@ class AP_SDK_HomeActivity : BaseActivity(){
             var isLogin = AP_SDK_PrefKeeper.isLoggedIn
             if(!isPin && !isLogin)
                 AP_SDK_GlobalMethods().showDialog(this)
+        }
+
+        mReceiver = object : BroadcastReceiver() {
+            override fun onReceive(p0: Context?, p1: Intent?) {
+                var action = p1!!.action
+                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)){
+                    if(p1.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_OFF){
+                        setUIWithBT()
+                    }
+                    else if(p1.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_ON){
+                        setUIWithBT()
+                    }
+                }
+            }
+        }
+        registerReceiver(mReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
+        bleAdapter = BluetoothAdapter.getDefaultAdapter()
+        if(bleAdapter == null){
+            AP_SDK_GlobalMethods().createSnackBar(headerLayout,"Device not supported")
+        }
+        else{
+            setUIWithBT()
+            startSubscription()
         }
     }
 
@@ -109,29 +130,11 @@ class AP_SDK_HomeActivity : BaseActivity(){
         super.onResume()
         menuButton.isClickable = true
         menuButton.isEnabled = true
-        mReceiver = object : BroadcastReceiver() {
-            override fun onReceive(p0: Context?, p1: Intent?) {
-                var action = p1!!.action
-                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)){
-                    if(p1.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_OFF){
-                        setUIWithBT()
-                    }
-                    else if(p1.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_ON){
-                        setUIWithBT()
-                    }
-                }
-            }
-        }
-        registerReceiver(mReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
-        setUIWithBT()
+        cardAdapterAPSDK.setValues(objModelManager.createSyncPayloadAPSDK.payloadList)
+        listViewRecycler.adapter = HomeListRecyclerView(objModelManager.APSDKSubscriptionPayloadForList.payloadList,this)
     }
 
     fun setUIWithBT(){
-        bleAdapter = BluetoothAdapter.getDefaultAdapter()
-        if(bleAdapter == null){
-            AP_SDK_GlobalMethods().createSnackBar(headerLayout,"Device not supported")
-        }
-        else{
             var result = BeaconTransmitter.checkTransmissionSupported(this)
             if(result == 0){
                 var isBleEnabled = bleAdapter?.isEnabled
@@ -158,27 +161,31 @@ class AP_SDK_HomeActivity : BaseActivity(){
             else{
                 AP_SDK_GlobalMethods().createSnackBar(headerLayout,"BLE is not supported in your device.")
             }
-        }
     }
 
     fun createHitForUUID(){
-        var registerMerchant = RegisterMerchantDevice()
-        var deviceIntValue = AP_SDK_PrefKeeper.merchantDeviceId
-        var deviceIdValue = deviceIntValue!!.toBigDecimal()
+        if(AP_SDK_GlobalMethods().checkConnection(this)){
+            var registerMerchant = RegisterMerchantDevice()
+            var deviceIntValue = AP_SDK_PrefKeeper.merchantDeviceId
+            var deviceIdValue = deviceIntValue!!.toBigDecimal()
 
-        registerMerchant.deviceId =  deviceIdValue
-        registerMerchant.token = AP_SDK_PrefKeeper.deviceToken
+            registerMerchant.deviceId =  deviceIdValue
+            registerMerchant.token = AP_SDK_PrefKeeper.deviceToken
 
-        var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
-        awsConnectionManager.hitServer(AP_SDK_DefineID().REGISTER_MERCHANT_LOCATION_DEVICE,this,registerMerchant)
+            var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
+            awsConnectionManager.hitServer(AP_SDK_DefineID().REGISTER_MERCHANT_LOCATION_DEVICE,this,registerMerchant)
+        }
+        else{
+            showMsgToast("Please check your Internet Connection")
+        }
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
+   /* override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         cardAdapterAPSDK = AP_SDK_HomeCardRecyclerView(objModelManager.createSyncPayloadAPSDK.payloadList,this@AP_SDK_HomeActivity)
         cardViewRecycler.adapter = cardAdapterAPSDK
         listViewRecycler.adapter = HomeListRecyclerView(objModelManager.APSDKSubscriptionPayloadForList.payloadList,this)
-    }
+    }*/
 
     //setting up hardcoded Recycler Adapter
     private fun setupView() {
@@ -196,12 +203,11 @@ class AP_SDK_HomeActivity : BaseActivity(){
 
         listViewRecycler.layoutManager = LinearLayoutManager(this)
 
-
-
         var text = "<font color=#06dab3>"+ APSDKHomeViewModel.numberOfConsumers.toString() +"</font> <font color=#232323>ready to pay</font>"
         readyToPay.setText(Html.fromHtml(text))
-
         cardViewRecycler.visibility = View.GONE
+        cardAdapterAPSDK = AP_SDK_HomeCardRecyclerView(objModelManager.createSyncPayloadAPSDK.payloadList, this@AP_SDK_HomeActivity)
+        cardViewRecycler.adapter = cardAdapterAPSDK
     }
 
     // to check the login count of this user on this device
@@ -244,7 +250,6 @@ class AP_SDK_HomeActivity : BaseActivity(){
                 }
             })
         }
-        startSubscription()
     }
 
 
@@ -296,11 +301,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
                         cardViewRecycler.visibility = View.VISIBLE
                         aeropayTransparent.visibility = View.GONE
 
-                        cardViewRecycler.layoutManager = LinearLayoutManager(
-                            this@AP_SDK_HomeActivity,
-                            LinearLayoutManager.HORIZONTAL,
-                            false
-                        )
+                        cardViewRecycler.layoutManager = LinearLayoutManager(this@AP_SDK_HomeActivity, LinearLayoutManager.HORIZONTAL, false)
 
                         APSDKHomeViewModel.setValues(response)
                         APSDKHomeViewModel.setPayload(response)
@@ -308,34 +309,27 @@ class AP_SDK_HomeActivity : BaseActivity(){
                         var transactionIdIndex = stringOutput.indexOf("transactionId")
                         var profileImageIndex = stringOutput.indexOf("profileImage")
 
-                        txnID =
-                            stringOutput.substring(transactionIdIndex + 27, profileImageIndex - 14)
+                        txnID = stringOutput.substring(transactionIdIndex + 27, profileImageIndex - 14)
 
                         var userNameIndex = stringOutput.indexOf("userName")
                         var expirationTimeIndex = stringOutput.indexOf("expirationTime")
                         var apStatusIndex = stringOutput.indexOf("APStatus")
 
-                        var userName =
-                            stringOutput.substring(userNameIndex + 23, apStatusIndex - 14)
-                        var profileImageUrl =
-                            stringOutput.substring(profileImageIndex + 27, expirationTimeIndex - 14)
+                        var userName = stringOutput.substring(userNameIndex + 23, apStatusIndex - 14)
+                        var profileImageUrl = stringOutput.substring(profileImageIndex + 27, expirationTimeIndex - 14)
+                        var expirationTime = stringOutput.substring(expirationTimeIndex + 22,stringOutput.length - 4)
 
-                        var createSyncPayload =
-                            AP_SDK_CreateSyncPayload()
+                        var createSyncPayload = AP_SDK_CreateSyncPayload()
 
                         createSyncPayload.userName = userName
                         createSyncPayload.status = apStatus
                         createSyncPayload.profileImage = profileImageUrl
                         createSyncPayload.transactionId = txnID
                         createSyncPayload.expirationTime = ""
+                        createSyncPayload.amountAdded = expirationTime
 
                         objModelManager.createSyncPayloadAPSDK.payloadList.add(createSyncPayload)
-
-                        cardAdapterAPSDK = AP_SDK_HomeCardRecyclerView(
-                            objModelManager.createSyncPayloadAPSDK.payloadList,
-                            this@AP_SDK_HomeActivity
-                        )
-                        cardViewRecycler.adapter = cardAdapterAPSDK
+                        cardAdapterAPSDK.setValues(objModelManager.createSyncPayloadAPSDK.payloadList)
 
                         cardAdapterAPSDK.onItemClick = { pos, view ->
                             onItemClick(pos, view)
@@ -434,7 +428,8 @@ class AP_SDK_HomeActivity : BaseActivity(){
         var userName = view.findViewById(com.aeropay_merchant.R.id.userName) as AP_SDK_CustomTextView
 
         userName.setText(objModelManager.createSyncPayloadAPSDK.payloadList[position].userName)
-        Glide.with(this).load(objModelManager.createSyncPayloadAPSDK.payloadList[position].profileImage).into(userImage)
+        Glide.with(this).load(objModelManager.createSyncPayloadAPSDK.payloadList[position].profileImage).apply(
+            RequestOptions.circleCropTransform()).into(userImage)
 
         etInput.Currency   = Currency.USA
         etInput.setText("0")
@@ -500,31 +495,38 @@ class AP_SDK_HomeActivity : BaseActivity(){
 
         var authorizeButton = view.findViewById<View>(com.aeropay_merchant.R.id.authoriseButton) as Button
         authorizeButton.setOnClickListener {
-            var processTransaction = ProcessTransaction()
 
-            processTransaction.type = "debit"
-            processTransaction.fromMerchant = "1".toBigDecimal()
-            processTransaction.merchantLocationId = AP_SDK_PrefKeeper.merchantLocationId!!.toBigDecimal()
+            if(AP_SDK_GlobalMethods().checkConnection(this)){
+                var processTransaction = ProcessTransaction()
 
-            var amount = etInput.text.toString()
-            processTransaction.transactionDescription = "Aeropay Transaction"
-            processTransaction.amount = amount.replace("$","").toBigDecimal()
-            processTransaction.debug = "0".toBigDecimal()
-            processTransaction.transactionId = txnID
+                processTransaction.type = "debit"
+                processTransaction.fromMerchant = "1".toBigDecimal()
+                processTransaction.merchantLocationId = AP_SDK_PrefKeeper.merchantLocationId!!.toBigDecimal()
 
-            APSDKHomeViewModel.userEntered = amount
+                var amount = etInput.text.toString()
+                processTransaction.transactionDescription = "Aeropay Transaction"
+                processTransaction.amount = amount.replace("$","").trim().toBigDecimal()
+                processTransaction.debug = "0".toBigDecimal()
+                processTransaction.transactionId = txnID
 
-            selectedPosition = position
+                APSDKHomeViewModel.userEntered = amount
 
-            var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
-            awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION,this,processTransaction)
+                selectedPosition = position
+
+                var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
+                awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION,this,processTransaction)
+            }
+            else{
+                showMsgToast("Please check your Internet Connection")
+            }
         }
     }
 
-    override fun onStop() {
+    override fun onDestroy() {
         unregisterReceiver(mReceiver)
         stopSharedAdvertisingBeacon()
-        super.onStop()
+        Log.d("Yeahh" ,"Success")
+        super.onDestroy()
     }
 
     fun sendProcessTransaction() {

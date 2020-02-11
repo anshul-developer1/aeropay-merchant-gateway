@@ -8,6 +8,7 @@ import android.widget.*
 import com.aeropay_merchant.Model.AP_SDK_AeropayModelManager
 import com.aeropay_merchant.R
 import com.aeropay_merchant.Utilities.AP_SDK_ConstantsStrings
+import com.aeropay_merchant.Utilities.AP_SDK_GlobalMethods
 import com.aeropay_merchant.Utilities.AP_SDK_PrefKeeper
 import com.aeropay_merchant.communication.AP_SDK_AWSConnectionManager
 import com.aeropay_merchant.communication.AP_SDK_DefineID
@@ -15,7 +16,7 @@ import com.aeropay_merchant.communication.AP_SDK_DefineID
 
 class AP_SDK_SettingsScreenActivity : BaseActivity() {
 
-    lateinit var save : Button
+    lateinit var save : ImageView
     lateinit var deviceNameSpinner : Spinner
     lateinit var storeLocationSpinner : Spinner
     var storeLocation : String? = null
@@ -146,14 +147,19 @@ class AP_SDK_SettingsScreenActivity : BaseActivity() {
 
     // saving store name and device name on save button click
     fun onStoreSelectedEvent(position : Int){
-        var objModelManager = AP_SDK_AeropayModelManager().getInstance()
+        if(AP_SDK_GlobalMethods().checkConnection(this)){
+            var objModelManager = AP_SDK_AeropayModelManager().getInstance()
 
-        var merchantLocation = MerchantLocationDevices()
-        var merchantLocationValue = objModelManager.merchantLocationsModelAPSDK.locations[position].merchantLocationId as Double
+            var merchantLocation = MerchantLocationDevices()
+            var merchantLocationValue = objModelManager.merchantLocationsModelAPSDK.locations[position].merchantLocationId as Double
 
-        merchantLocation.locationId =  merchantLocationValue.toBigDecimal()
+            merchantLocation.locationId =  merchantLocationValue.toBigDecimal()
 
-        var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
-        awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_DEVICES,this,merchantLocation)
+            var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
+            awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_DEVICES,this,merchantLocation)
+        }
+        else{
+            showMsgToast("Please check your Internet Connection")
+        }
     }
 }

@@ -10,7 +10,8 @@ import com.aeropay_merchant.Utilities.AP_SDK_PrefKeeper
 
 class AP_SDK_FastLoginActivity : BaseActivity() {
 
-    lateinit var save : Button
+
+    lateinit var save : ImageView
     lateinit var autoLoginToggle : ToggleButton
     lateinit var pinLoginToggle : ToggleButton
     lateinit var updateTextView: TextView

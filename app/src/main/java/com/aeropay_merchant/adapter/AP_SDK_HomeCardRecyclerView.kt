@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.aeropay_merchant.Model.AP_SDK_CreateSyncPayload
 import com.aeropay_merchant.R
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.ap_sdk_recycler_card_layout.view.*
 
 class AP_SDK_HomeCardRecyclerView(var payerName: MutableList<AP_SDK_CreateSyncPayload>, val context: Context) : RecyclerView.Adapter<AP_SDK_HomeCardRecyclerView.CardViewHolder>() {
@@ -26,7 +27,7 @@ class AP_SDK_HomeCardRecyclerView(var payerName: MutableList<AP_SDK_CreateSyncPa
 
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
         holder?.payerName?.text = payerName[position].userName.toString()
-        Glide.with(context).load(payerName[position].profileImage.toString()).into(holder?.userImage)
+        Glide.with(context).load(payerName[position].profileImage.toString()).apply(RequestOptions.circleCropTransform()).into(holder?.userImage)
     }
 
     fun setValues(payerDetails: MutableList<AP_SDK_CreateSyncPayload>){

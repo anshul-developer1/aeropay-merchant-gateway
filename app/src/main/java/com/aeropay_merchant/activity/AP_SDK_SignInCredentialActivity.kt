@@ -69,12 +69,15 @@ class AP_SDK_SignInCredentialActivity : BaseActivity(){
         else if(!(AP_SDK_GlobalMethods().isValidEmailId(userName))){
             Toast.makeText(this,"Please enter a valid Email ID.",Toast.LENGTH_SHORT).show()
         }
-        else
-        {
-        AP_SDK_GlobalMethods().showLoader(this)
-        view.isClickable = false
-        view.isEnabled = false
-        AP_SDK_GlobalMethods().userCognitoLoginHandler(this@AP_SDK_SignInCredentialActivity, view,userName,password)
+        else {
+            if (AP_SDK_GlobalMethods().checkConnection(this)) {
+                AP_SDK_GlobalMethods().showLoader(this)
+                view.isClickable = false
+                view.isEnabled = false
+                AP_SDK_GlobalMethods().userCognitoLoginHandler(this@AP_SDK_SignInCredentialActivity, view, userName, password)
+            } else {
+                showMsgToast("Please check your Internet Connection")
+            }
         }
     }
 

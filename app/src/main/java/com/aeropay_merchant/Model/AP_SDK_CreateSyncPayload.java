@@ -15,6 +15,16 @@ public class AP_SDK_CreateSyncPayload {
     private String profileImage;
     @SerializedName("expirationTime")
     private String expirationTime;
+    @SerializedName("amountAdded")
+    private String amountAdded;
+
+    public String getAmountAdded() {
+        return amountAdded;
+    }
+
+    public void setAmountAdded(String amountAdded) {
+        this.amountAdded = amountAdded;
+    }
 
     public String getUserName() {
         return userName;

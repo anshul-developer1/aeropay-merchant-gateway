@@ -4,6 +4,6 @@ interface AP_SDK_ICommunicationHandler {
 
     fun onSuccess(outputParms: Int)
 
-    fun onFailure(outputParms: Int)
+    fun onFailure(outputParms: Int, errorMessage: String)
 
 }

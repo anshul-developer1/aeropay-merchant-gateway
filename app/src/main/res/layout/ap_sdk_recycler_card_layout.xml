@@ -23,9 +23,9 @@
             android:layout_width="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_height="@dimen/_70sdp"
+            android:src="@drawable/userimage"
             android:layout_marginRight="@dimen/_10sdp"
             android:layout_marginLeft="@dimen/_10sdp"
-            android:src="@drawable/userimage"
             android:id="@+id/userImage"></ImageView>
 
         <com.aeropay_merchant.view.AP_SDK_CustomTextView

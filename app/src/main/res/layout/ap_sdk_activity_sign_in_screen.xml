@@ -14,7 +14,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@+id/aeropayLogo"
@@ -41,10 +41,11 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/loginImage"
                 android:adjustViewBounds="true"
-                android:layout_marginLeft="@dimen/_30sdp"
-                android:layout_marginRight="@dimen/_30sdp"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="@dimen/_45sdp"
+                android:layout_marginRight="@dimen/_45sdp"
                 android:layout_marginTop="@dimen/_50sdp"
-                android:onClick="signInButtonClick"
                 android:layout_marginBottom="@dimen/_20sdp"
                 android:src="@drawable/sign_in_button">
             </ImageView>

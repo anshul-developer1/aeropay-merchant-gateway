@@ -34,8 +34,14 @@ class AP_SDK_NavigationMenuActivity : BaseActivity() {
     private fun setListeners() {
         menuListView.setOnItemClickListener { parent, view, position, id ->
             if(position == 0){
-                var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
-                awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_LOCATIONS,this,null)
+                if(AP_SDK_GlobalMethods().checkConnection(this)){
+                    var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
+                    awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_LOCATIONS,this,null)
+                }
+                else{
+                    showMsgToast("Please check your Internet Connection")
+                }
+
             }
             else if(position == 1){
                 launchActivity(AP_SDK_FastLoginActivity::class.java)

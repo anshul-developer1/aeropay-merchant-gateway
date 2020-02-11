@@ -172,16 +172,18 @@
             android:layout_marginBottom="@dimen/_20sdp"
             android:layout_height="wrap_content">
 
-            <Button
-                android:layout_width="match_parent"
+            <ImageView
+                android:layout_width="@dimen/_250sdp"
                 android:layout_height="@dimen/_40sdp"
                 android:id="@+id/saveButton"
+                android:layout_centerHorizontal="true"
                 android:onClick="onSaveButtonClick"
+                android:adjustViewBounds="true"
                 android:layout_alignParentBottom="true"
-                android:layout_marginRight="@dimen/_30sdp"
-                android:layout_marginLeft="@dimen/_30sdp"
+                android:layout_marginRight="@dimen/_40sdp"
+                android:layout_marginLeft="@dimen/_40sdp"
                 android:background="@drawable/save_button">
-            </Button>
+            </ImageView>
 
         </RelativeLayout>
     </RelativeLayout>

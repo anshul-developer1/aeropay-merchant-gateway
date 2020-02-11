@@ -5,11 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.util.Log
 import android.view.View
 import android.view.Window
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat.getSystemService
 import com.aeropay_merchant.R
 import com.aeropay_merchant.activity.*
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice
@@ -24,7 +27,8 @@ import com.amazonaws.regions.Regions
 import com.androidadvance.topsnackbar.TSnackbar
 import java.util.regex.Pattern
 import com.google.firebase.iid.FirebaseInstanceId
-
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class AP_SDK_GlobalMethods {
@@ -202,8 +206,11 @@ class AP_SDK_GlobalMethods {
         textView.setTextColor(Color.BLACK)
         textView.textSize = 18F
         snackbar.show()
+    }
 
-        /*var enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-          startActivity(enableBtIntent)*/
+    fun checkConnection(mContext : Context?): Boolean {
+        val connectivityManager = mContext!!.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val netInfo = connectivityManager.activeNetworkInfo
+        return netInfo != null && netInfo.isConnected
     }
 }
