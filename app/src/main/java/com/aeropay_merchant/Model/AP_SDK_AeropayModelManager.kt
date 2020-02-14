@@ -14,8 +14,11 @@ class AP_SDK_AeropayModelManager {
         AP_SDK_FetchMerchantProfileModel()
     var APSDKRegisterMerchantDevices: AP_SDK_RegisterMerchantDeviceResponse =
         AP_SDK_RegisterMerchantDeviceResponse()
-    var createSyncPayloadAPSDK: AP_SDK_SubscriptionPayload =
-        AP_SDK_SubscriptionPayload()
+
+    var createSyncPayloadAPSDK: AP_SDK_SubscriptionPayload = AP_SDK_SubscriptionPayload()
+
+    var cardPayloadData: AP_SDK_CreateSyncPayload = AP_SDK_CreateSyncPayload()
+
     var APSDKSubscriptionPayloadForList: AP_SDK_SubscriptionPayloadDataForList =
         AP_SDK_SubscriptionPayloadDataForList()
 

@@ -3,6 +3,7 @@ package com.aeropay_merchant.activity
 
 import AP.model.ProcessTransaction
 import AP.model.RegisterMerchantDevice
+import android.app.Activity
 import android.os.Bundle
 import android.text.Html
 import android.view.View
@@ -23,9 +24,11 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Typeface
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.fragment.app.FragmentActivity
 import com.aeropay_merchant.Model.AP_SDK_CreateSyncPayload
+import com.aeropay_merchant.Model.AP_SDK_FetchMerchantProfileModel
 import com.aeropay_merchant.Utilities.*
 import com.aeropay_merchant.ViewModel.AP_SDK_HomeViewModel
 import com.aeropay_merchant.adapter.AP_SDK_HomeCardRecyclerView
@@ -40,6 +43,12 @@ import com.earthling.atminput.ATMEditText
 import com.earthling.atminput.Currency
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
+import okhttp3.internal.format
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.HashMap
+
+
 
 
 class AP_SDK_HomeActivity : BaseActivity(){
@@ -56,6 +65,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
     lateinit var mReceiver: BroadcastReceiver
     lateinit var subscriptionWatcher: AppSyncSubscriptionCall<OnCreateMerchantSyncSubscription.Data>
     lateinit var APSDKHomeViewModel : AP_SDK_HomeViewModel
+    lateinit var homeListAdapter : HomeListRecyclerView
     lateinit var txnID : String
     var bleAdapter: BluetoothAdapter? = null
     var isBleSupported = false
@@ -75,7 +85,6 @@ class AP_SDK_HomeActivity : BaseActivity(){
         AP_SDK_GlobalMethods().getDeviceToken(applicationContext)
         setListeners()
         maintainUserLoginCount()
-
         bottomFragment = BottomSheetDialog(this)
 
         var loginCount = AP_SDK_PrefKeeper.logInCount
@@ -92,6 +101,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
                 if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)){
                     if(p1.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_OFF){
                         setUIWithBT()
+                        AP_SDK_GlobalMethods().createSnackBar(headerLayout, "To accept payment from Consumers, Please enable your Bluetooth.")
                     }
                     else if(p1.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_ON){
                         setUIWithBT()
@@ -102,7 +112,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
         registerReceiver(mReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
         bleAdapter = BluetoothAdapter.getDefaultAdapter()
         if(bleAdapter == null){
-            AP_SDK_GlobalMethods().createSnackBar(headerLayout,"Device not supported")
+            AP_SDK_GlobalMethods().createSnackBar(headerLayout,"Device not supported BLE")
         }
         else{
             setUIWithBT()
@@ -131,9 +141,11 @@ class AP_SDK_HomeActivity : BaseActivity(){
         menuButton.isClickable = true
         menuButton.isEnabled = true
         cardAdapterAPSDK.setValues(objModelManager.createSyncPayloadAPSDK.payloadList)
-        listViewRecycler.adapter = HomeListRecyclerView(objModelManager.APSDKSubscriptionPayloadForList.payloadList,this)
+        homeListAdapter = HomeListRecyclerView(objModelManager.APSDKSubscriptionPayloadForList.payloadList,this)
+        listViewRecycler.adapter = homeListAdapter
     }
 
+    // Bluetooth Connection Handling and UI Changes
     fun setUIWithBT(){
             var result = BeaconTransmitter.checkTransmissionSupported(this)
             if(result == 0){
@@ -148,21 +160,27 @@ class AP_SDK_HomeActivity : BaseActivity(){
                     }
                 }
                 else{
-                    cardViewRecycler.visibility = View.GONE
-                    aeropayTransparent.visibility = View.VISIBLE
-                    AP_SDK_GlobalMethods().createSnackBar(headerLayout,"To accept payment form Consumers, Please enable your Bluetooth.")
+                    if(AP_SDK_GlobalMethods().checkConnection(this)){
+                        var cardListLength = objModelManager.createSyncPayloadAPSDK.payloadList.size
+                        if(cardListLength == 0){
+                            cardViewRecycler.visibility = View.GONE
+                            aeropayTransparent.visibility = View.VISIBLE
+                            AP_SDK_GlobalMethods().createSnackBar(headerLayout, "To accept payment from Consumers, Please enable your Bluetooth.")
+                        }
+                    }
                 }
             }
             else if(result == 5){
                 cardViewRecycler.visibility = View.GONE
                 aeropayTransparent.visibility = View.VISIBLE
-                AP_SDK_GlobalMethods().createSnackBar(headerLayout,"To accept payment form Consumers, Please enable your Bluetooth.")
+                AP_SDK_GlobalMethods().createSnackBar(headerLayout,"To accept payment from Consumers, Please enable your Bluetooth.")
             }
             else{
                 AP_SDK_GlobalMethods().createSnackBar(headerLayout,"BLE is not supported in your device.")
             }
     }
 
+    // Registering Merchant Device and Request for UUID of Device
     fun createHitForUUID(){
         if(AP_SDK_GlobalMethods().checkConnection(this)){
             var registerMerchant = RegisterMerchantDevice()
@@ -180,16 +198,10 @@ class AP_SDK_HomeActivity : BaseActivity(){
         }
     }
 
-   /* override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        cardAdapterAPSDK = AP_SDK_HomeCardRecyclerView(objModelManager.createSyncPayloadAPSDK.payloadList,this@AP_SDK_HomeActivity)
-        cardViewRecycler.adapter = cardAdapterAPSDK
-        listViewRecycler.adapter = HomeListRecyclerView(objModelManager.APSDKSubscriptionPayloadForList.payloadList,this)
-    }*/
-
     //setting up hardcoded Recycler Adapter
     private fun setupView() {
-        listViewRecycler.adapter = HomeListRecyclerView(objModelManager.APSDKSubscriptionPayloadForList.payloadList,this)
+        homeListAdapter = HomeListRecyclerView(objModelManager.APSDKSubscriptionPayloadForList.payloadList,this)
+        listViewRecycler.adapter = homeListAdapter
     }
 
     //inflating UI controls
@@ -203,8 +215,8 @@ class AP_SDK_HomeActivity : BaseActivity(){
 
         listViewRecycler.layoutManager = LinearLayoutManager(this)
 
-        var text = "<font color=#06dab3>"+ APSDKHomeViewModel.numberOfConsumers.toString() +"</font> <font color=#232323>ready to pay</font>"
-        readyToPay.setText(Html.fromHtml(text))
+        var text = "<font color=#06dab3>"+ APSDKHomeViewModel.numberOfConsumers.toString() +"</font> <font color=#232323>ready to pay : </font>" +  "<font color=#06dab3>"+ AP_SDK_PrefKeeper.deviceName
+                readyToPay.setText(Html.fromHtml(text))
         cardViewRecycler.visibility = View.GONE
         cardAdapterAPSDK = AP_SDK_HomeCardRecyclerView(objModelManager.createSyncPayloadAPSDK.payloadList, this@AP_SDK_HomeActivity)
         cardViewRecycler.adapter = cardAdapterAPSDK
@@ -217,6 +229,8 @@ class AP_SDK_HomeActivity : BaseActivity(){
         AP_SDK_PrefKeeper.logInCount = finalCount
     }
 
+
+    // Save majorId, minorId and UUID in Preferences.
     fun creatBeaconTransmission(){
         var registerMerchantDevice = AP_SDK_AeropayModelManager().getInstance().APSDKRegisterMerchantDevices
 
@@ -227,6 +241,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
         startSharedAdvertisingBeaconWithString(registerMerchantDevice.uuid as String, registerMerchantDevice.majorID.toInt() , registerMerchantDevice.minorID.toInt(), "AP Stores")
     }
 
+    // send BLE Connection Request
     fun startSharedAdvertisingBeaconWithString(uuid: String, major: Int, minor: Int, identifier: String) {
         val manufacturer = 0x4C
         val beacon = Beacon.Builder()
@@ -252,7 +267,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
         }
     }
 
-
+    // stop BLE Radiation when activity is destroyed.
     fun stopSharedAdvertisingBeacon() {
         if(isBleSupported){
             if (this.beaconTransmitter != null) {
@@ -265,32 +280,28 @@ class AP_SDK_HomeActivity : BaseActivity(){
         }
     }
 
+    // Listen to Merchant Device Location Subscription, whether there is any change
     private fun startSubscription() {
         val subscriptionCallback = object : AppSyncSubscriptionCall.Callback<OnCreateMerchantSyncSubscription.Data> {
             override fun onResponse(response: Response<OnCreateMerchantSyncSubscription.Data>) {
                 runOnUiThread {
                     isBillSend = true
                     var payload = response.data()!!.onCreateMerchantSync()!!.payload().toString()
-                    var stringOutput = Gson().toJson(payload)
+                    objModelManager.cardPayloadData = Gson().fromJson(payload.substring(1,payload.length - 1), AP_SDK_CreateSyncPayload::class.java)
 
-                    var apStatusIndex = stringOutput.indexOf("APStatus")
-                    var transactionIdIndex = stringOutput.indexOf("transactionId")
-
-                    var apStatus = stringOutput.substring(apStatusIndex + 22, transactionIdIndex - 14)
+                    var apStatus = objModelManager.cardPayloadData.status
+                    txnID = objModelManager.cardPayloadData.transactionId
+                    if(objModelManager.cardPayloadData.expirationTime.toInt() != 0){
+                        objModelManager.cardPayloadData.expirationTime = AP_SDK_GlobalMethods().EpochToDate(objModelManager.cardPayloadData.expirationTime.toLong(),"dd-MM-YYYY HH:mm:ss")
+                    }
 
                     if (payload.contains("tipAmount")) {
                         var listSize = objModelManager.APSDKSubscriptionPayloadForList.payloadList.size
-                        var expirationTimeIndex = stringOutput.indexOf("expirationTime")
-                        var totalAmountIndex = stringOutput.indexOf("totalAmount")
-                        var tipAmountIndex = stringOutput.indexOf("tipAmount")
 
-                        var totalAmount = stringOutput.substring(totalAmountIndex + 26, tipAmountIndex - 15)
-
-                        txnID = stringOutput.substring(transactionIdIndex + 27, expirationTimeIndex - 14)
                         for (i in 0..listSize - 1) {
                             if (txnID.equals(objModelManager.APSDKSubscriptionPayloadForList.payloadList[i].transactionId)) {
                                 objModelManager.APSDKSubscriptionPayloadForList.payloadList[i].status = apStatus
-                                objModelManager.APSDKSubscriptionPayloadForList.payloadList[i].expirationTime = "$" + totalAmount
+                                objModelManager.APSDKSubscriptionPayloadForList.payloadList[i].tip = objModelManager.cardPayloadData.tip
                             }
                         }
                         setupView()
@@ -306,66 +317,44 @@ class AP_SDK_HomeActivity : BaseActivity(){
                         APSDKHomeViewModel.setValues(response)
                         APSDKHomeViewModel.setPayload(response)
 
-                        var transactionIdIndex = stringOutput.indexOf("transactionId")
-                        var profileImageIndex = stringOutput.indexOf("profileImage")
+                        txnID = objModelManager.cardPayloadData.transactionId
 
-                        txnID = stringOutput.substring(transactionIdIndex + 27, profileImageIndex - 14)
-
-                        var userNameIndex = stringOutput.indexOf("userName")
-                        var expirationTimeIndex = stringOutput.indexOf("expirationTime")
-                        var apStatusIndex = stringOutput.indexOf("APStatus")
-
-                        var userName = stringOutput.substring(userNameIndex + 23, apStatusIndex - 14)
-                        var profileImageUrl = stringOutput.substring(profileImageIndex + 27, expirationTimeIndex - 14)
-                        var expirationTime = stringOutput.substring(expirationTimeIndex + 22,stringOutput.length - 4)
-
-                        var createSyncPayload = AP_SDK_CreateSyncPayload()
-
-                        createSyncPayload.userName = userName
-                        createSyncPayload.status = apStatus
-                        createSyncPayload.profileImage = profileImageUrl
-                        createSyncPayload.transactionId = txnID
-                        createSyncPayload.expirationTime = ""
-                        createSyncPayload.amountAdded = expirationTime
+                        var createSyncPayload = objModelManager.cardPayloadData
 
                         objModelManager.createSyncPayloadAPSDK.payloadList.add(createSyncPayload)
+
                         cardAdapterAPSDK.setValues(objModelManager.createSyncPayloadAPSDK.payloadList)
 
-                        cardAdapterAPSDK.onItemClick = { pos, view ->
-                            onItemClick(pos, view)
-                        }
+                        cardAdapterAPSDK.onItemClick = { pos, view -> onItemClick(pos, view) }
 
-                        APSDKHomeViewModel.numberOfConsumers =
-                            APSDKHomeViewModel.numberOfConsumers!! + 1
+                        APSDKHomeViewModel.numberOfConsumers = APSDKHomeViewModel.numberOfConsumers!! + 1
 
-                        var text =
-                            "<font color=#06dab3>" + APSDKHomeViewModel.numberOfConsumers.toString() + "</font> <font color=#232323>ready to pay</font>"
+                        var text = "<font color=#06dab3>" + APSDKHomeViewModel.numberOfConsumers.toString() + "</font> <font color=#232323>ready to pay : </font>" +  "<font color=#06dab3>"+ AP_SDK_PrefKeeper.deviceName
                         readyToPay.setText(Html.fromHtml(text))
-                    } else if (apStatus.equals("processed")) {
-                        var listSize =
-                            objModelManager.APSDKSubscriptionPayloadForList.payloadList.size
-                        var profileImageIndex = stringOutput.indexOf("profileImage")
-                        txnID =
-                            stringOutput.substring(transactionIdIndex + 27, profileImageIndex - 14)
+
+                    }
+                    else if (apStatus.equals("processed"))
+                    {
+                        var listSize = objModelManager.APSDKSubscriptionPayloadForList.payloadList.size
+
                         for (i in 0..listSize - 1) {
                             if (txnID.equals(objModelManager.APSDKSubscriptionPayloadForList.payloadList[i].transactionId)) {
-                                objModelManager.APSDKSubscriptionPayloadForList.payloadList[i].status =
-                                    apStatus
+                                homeListAdapter.stopTimer()
+                                objModelManager.APSDKSubscriptionPayloadForList.payloadList[i].status = apStatus
                             }
                         }
                         setupView()
-                    } else if (apStatus.equals("cancelled")) {
-
+                    }
+                    else if (apStatus.equals("cancelled"))
+                    {
                         var listSize = objModelManager.APSDKSubscriptionPayloadForList.payloadList.size
-                        var profileImageIndex = stringOutput.indexOf("profileImage")
-                        txnID =
-                            stringOutput.substring(transactionIdIndex + 27, profileImageIndex - 14)
 
                         for (i in 0..listSize - 1) {
                             if (txnID.equals(objModelManager.APSDKSubscriptionPayloadForList.payloadList[i].transactionId)) {
                                 isBillSend = false
-                                objModelManager.APSDKSubscriptionPayloadForList.payloadList[i].status =
-                                    apStatus
+                                objModelManager.APSDKSubscriptionPayloadForList.payloadList[i].status = apStatus
+                                objModelManager.APSDKSubscriptionPayloadForList.payloadList[i].expirationTime = "0"
+                                homeListAdapter.stopTimer()
                             }
                         }
 
@@ -378,7 +367,9 @@ class AP_SDK_HomeActivity : BaseActivity(){
                             for (i in 0..listSizeCard - 1) {
                                 if (txnID.equals(objModelManager.createSyncPayloadAPSDK.payloadList[i].transactionId)) {
                                     isBillSend = false
+
                                     objModelManager.createSyncPayloadAPSDK.payloadList[i].status = apStatus
+                                    objModelManager.createSyncPayloadAPSDK.payloadList[i].expirationTime = "0"
                                     objModelManager.APSDKSubscriptionPayloadForList.payloadList.reverse()
                                     objModelManager.APSDKSubscriptionPayloadForList.payloadList.add(objModelManager.createSyncPayloadAPSDK.payloadList[i])
                                     objModelManager.APSDKSubscriptionPayloadForList.payloadList.reverse()
@@ -386,10 +377,8 @@ class AP_SDK_HomeActivity : BaseActivity(){
                                     objModelManager.createSyncPayloadAPSDK.payloadList.removeAt(i)
                                     cardAdapterAPSDK.setValues(objModelManager.createSyncPayloadAPSDK.payloadList)
 
-                                    APSDKHomeViewModel.numberOfConsumers =
-                                        APSDKHomeViewModel.numberOfConsumers!! - 1
-                                    var text =
-                                        "<font color=#06dab3>" + APSDKHomeViewModel.numberOfConsumers.toString() + "</font> <font color=#232323>ready to pay</font>"
+                                    APSDKHomeViewModel.numberOfConsumers = APSDKHomeViewModel.numberOfConsumers!! - 1
+                                    var text = "<font color=#06dab3>" + APSDKHomeViewModel.numberOfConsumers.toString() + "</font> <font color=#232323>ready to pay : </font>" +  "<font color=#06dab3>"+ AP_SDK_PrefKeeper.deviceName
                                     readyToPay.setText(Html.fromHtml(text))
                                 }
                             }
@@ -414,7 +403,8 @@ class AP_SDK_HomeActivity : BaseActivity(){
         subscriptionWatcher.execute(subscriptionCallback)
     }
 
-     fun onItemClick(position : Int,view: View) {
+    // On Card Adapter Click Event to open Authorize payment Screen
+    fun onItemClick(position : Int,view: View) {
          APSDKHomeViewModel.userEntered = ""
          var view = (this as FragmentActivity).layoutInflater.inflate(com.aeropay_merchant.R.layout.ap_sdk_authorize_payment, null)
          setValuesInDialog(view,position)
@@ -422,10 +412,14 @@ class AP_SDK_HomeActivity : BaseActivity(){
          bottomFragment.show()
     }
 
+    // Set Values in Dialog and Initialize UI of Dialog
     private fun setValuesInDialog(view: View, position: Int) {
         var etInput = view.findViewById(com.aeropay_merchant.R.id.amountEdit) as ATMEditText
         var userImage = view.findViewById(com.aeropay_merchant.R.id.userImage) as ImageView
         var userName = view.findViewById(com.aeropay_merchant.R.id.userName) as AP_SDK_CustomTextView
+
+        var imm =  getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0)
 
         userName.setText(objModelManager.createSyncPayloadAPSDK.payloadList[position].userName)
         Glide.with(this).load(objModelManager.createSyncPayloadAPSDK.payloadList[position].profileImage).apply(
@@ -496,28 +490,46 @@ class AP_SDK_HomeActivity : BaseActivity(){
         var authorizeButton = view.findViewById<View>(com.aeropay_merchant.R.id.authoriseButton) as Button
         authorizeButton.setOnClickListener {
 
-            if(AP_SDK_GlobalMethods().checkConnection(this)){
-                var processTransaction = ProcessTransaction()
-
-                processTransaction.type = "debit"
-                processTransaction.fromMerchant = "1".toBigDecimal()
-                processTransaction.merchantLocationId = AP_SDK_PrefKeeper.merchantLocationId!!.toBigDecimal()
-
-                var amount = etInput.text.toString()
-                processTransaction.transactionDescription = "Aeropay Transaction"
-                processTransaction.amount = amount.replace("$","").trim().toBigDecimal()
-                processTransaction.debug = "0".toBigDecimal()
-                processTransaction.transactionId = txnID
-
-                APSDKHomeViewModel.userEntered = amount
-
-                selectedPosition = position
-
-                var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
-                awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION,this,processTransaction)
+            var amount = etInput.text.toString()
+            var amountValueLength = amount.replace("$","").trim().length
+            if(amountValueLength > 6){
+                showMsgToast("Amount should be lesser than or equal to $500.00.")
             }
-            else{
-                showMsgToast("Please check your Internet Connection")
+            else {
+                if (amount.replace("$", "").trim().toDouble() > 500.00) {
+                    showMsgToast("Amount should be lesser than or equal to $500.00.")
+                } else {
+                    var expirationTime = objModelManager.createSyncPayloadAPSDK.payloadList[position].expirationTime
+                    if(!(expirationTime.equals("0"))){
+                        if (AP_SDK_GlobalMethods().checkConnection(this)) {
+                            var processTransaction = ProcessTransaction()
+
+                            processTransaction.type = "debit"
+                            processTransaction.fromMerchant = "1".toBigDecimal()
+                            processTransaction.merchantLocationId = AP_SDK_PrefKeeper.merchantLocationId!!.toBigDecimal()
+
+                            processTransaction.transactionDescription = "Aeropay Transaction"
+                            processTransaction.amount = amount.replace("$", "").trim().toBigDecimal()
+                            processTransaction.debug = "0".toBigDecimal()
+                            processTransaction.transactionId = txnID
+
+                            APSDKHomeViewModel.userEntered = amount
+
+                            selectedPosition = position
+                            var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
+                            awsConnectionManager.hitServer(
+                                AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION,
+                                this,
+                                processTransaction
+                            )
+                        } else {
+                            showMsgToast("Please check your Internet Connection")
+                        }
+                    }
+                    else{
+                        showMsgToast("Transaction has expired.")
+                    }
+                }
             }
         }
     }
@@ -529,29 +541,62 @@ class AP_SDK_HomeActivity : BaseActivity(){
         super.onDestroy()
     }
 
-    fun sendProcessTransaction() {
+    // Transaction Progress Success and Updating UI
+    fun sendProcessTransaction(isSuccess : Boolean) {
         var inProgressUserDetail = objModelManager.createSyncPayloadAPSDK.payloadList[selectedPosition!!]
-
+        var expirationTime = inProgressUserDetail.expirationTime
+        objModelManager.createSyncPayloadAPSDK.payloadList[selectedPosition!!].expirationTime = "0"
         objModelManager.createSyncPayloadAPSDK.payloadList.removeAt(selectedPosition!!)
         cardAdapterAPSDK.setValues(objModelManager.createSyncPayloadAPSDK.payloadList)
 
         APSDKHomeViewModel.numberOfConsumers = APSDKHomeViewModel.numberOfConsumers!! - 1
-        var text = "<font color=#06dab3>"+ APSDKHomeViewModel.numberOfConsumers.toString() +"</font> <font color=#232323>ready to pay</font>"
+        var text = "<font color=#06dab3>"+ APSDKHomeViewModel.numberOfConsumers.toString() +"</font> <font color=#232323>ready to pay : </font>" +  "<font color=#06dab3>"+ AP_SDK_PrefKeeper.deviceName
         readyToPay.setText(Html.fromHtml(text))
 
-        var createSyncPayload = AP_SDK_CreateSyncPayload()
+        inProgressUserDetail.expirationTime = expirationTime
 
-        createSyncPayload.userName = inProgressUserDetail.userName
-        createSyncPayload.status = "in-progress"
-        createSyncPayload.profileImage = inProgressUserDetail.profileImage
-        createSyncPayload.transactionId = inProgressUserDetail.transactionId
-        createSyncPayload.expirationTime = APSDKHomeViewModel.userEntered
+        var createSyncPayload = inProgressUserDetail
+
+        if(isSuccess){
+            createSyncPayload.status = "in-progress"
+            createSyncPayload.amountAdded = APSDKHomeViewModel.userEntered
+        }
+        else{
+            createSyncPayload.status = "cancelled"
+            createSyncPayload.amountAdded = ""
+            createSyncPayload.expirationTime = "0"
+        }
 
         objModelManager.APSDKSubscriptionPayloadForList.payloadList.reverse()
         objModelManager.APSDKSubscriptionPayloadForList.payloadList.add(createSyncPayload)
         objModelManager.APSDKSubscriptionPayloadForList.payloadList.reverse()
         setupView()
         bottomFragment.cancel()
+    }
+
+    // Change UI when Transaction has expired.
+    fun updateExpireCard(position : Int) {
+        var inProgressUserDetail = objModelManager.createSyncPayloadAPSDK.payloadList[position!!]
+
+        objModelManager.createSyncPayloadAPSDK.payloadList.removeAt(position!!)
+        cardAdapterAPSDK.setValues(objModelManager.createSyncPayloadAPSDK.payloadList)
+
+        APSDKHomeViewModel.numberOfConsumers = APSDKHomeViewModel.numberOfConsumers!! - 1
+        var text = "<font color=#06dab3>"+ APSDKHomeViewModel.numberOfConsumers.toString() +"</font> <font color=#232323>ready to pay : </font>" +  "<font color=#06dab3>"+ AP_SDK_PrefKeeper.deviceName
+        readyToPay.setText(Html.fromHtml(text))
+        inProgressUserDetail.amountAdded = ""
+
+        var createSyncPayload = inProgressUserDetail
+
+        createSyncPayload.status = "cancelled"
+
+        objModelManager.APSDKSubscriptionPayloadForList.payloadList.reverse()
+        objModelManager.APSDKSubscriptionPayloadForList.payloadList.add(createSyncPayload)
+        objModelManager.APSDKSubscriptionPayloadForList.payloadList.reverse()
+        setupView()
+        if(bottomFragment.isShowing){
+            bottomFragment.cancel()
+        }
     }
 
 }

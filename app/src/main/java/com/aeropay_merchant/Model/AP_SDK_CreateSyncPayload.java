@@ -1,10 +1,12 @@
 package com.aeropay_merchant.Model;
 
+import androidx.lifecycle.ViewModel;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class AP_SDK_CreateSyncPayload {
+public class AP_SDK_CreateSyncPayload extends ViewModel {
     @SerializedName("userName")
     private String userName;
     @SerializedName("APStatus")
@@ -17,6 +19,16 @@ public class AP_SDK_CreateSyncPayload {
     private String expirationTime;
     @SerializedName("amountAdded")
     private String amountAdded;
+    @SerializedName("tip")
+    private Object tip;
+
+    public Object getTip() {
+        return tip;
+    }
+
+    public void setTip(Object tip) {
+        this.tip = tip;
+    }
 
     public String getAmountAdded() {
         return amountAdded;

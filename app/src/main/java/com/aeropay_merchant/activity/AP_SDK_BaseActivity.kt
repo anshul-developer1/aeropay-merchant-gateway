@@ -71,7 +71,7 @@ open class BaseActivity : AppCompatActivity() , AP_SDK_ICommunicationHandler{
             (this as AP_SDK_SettingsScreenActivity).createDeviceSpinner()
         }
         else if(outputParms.equals(AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION)){
-            (this as AP_SDK_HomeActivity).sendProcessTransaction()
+            (this as AP_SDK_HomeActivity).sendProcessTransaction(true)
         }
         else if(outputParms.equals(AP_SDK_DefineID().REGISTER_MERCHANT_LOCATION_DEVICE)){
             (this as AP_SDK_HomeActivity).creatBeaconTransmission()
@@ -94,7 +94,10 @@ open class BaseActivity : AppCompatActivity() , AP_SDK_ICommunicationHandler{
         }
         else if(outputParms.equals(AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION)){
             showMsgToast(errorMessage)
-            (this as AP_SDK_HomeActivity).sendProcessTransaction()
+            (this as AP_SDK_HomeActivity).sendProcessTransaction(false)
+        }
+        else{
+            showMsgToast(errorMessage)
         }
     }
 

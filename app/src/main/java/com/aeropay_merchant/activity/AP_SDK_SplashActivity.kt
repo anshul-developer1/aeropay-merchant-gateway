@@ -63,7 +63,7 @@ class AP_SDK_SplashActivity : BaseActivity() {
              launchActivity(AP_SDK_PinEnterActivity::class.java,intent)
          }
         else {
-             launchActivity(AP_SDK_SignInScreenActivity::class.java)
+             launchActivity(AP_SDK_SignInCredentialActivity::class.java)
              finish()
          }
     }

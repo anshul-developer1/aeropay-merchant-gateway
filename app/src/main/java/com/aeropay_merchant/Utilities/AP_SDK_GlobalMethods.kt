@@ -175,6 +175,7 @@ class AP_SDK_GlobalMethods {
         cognitoUser.getSessionInBackground(authentication)
     }
 
+    // Email Validation Check
     fun isValidEmailId(email: String): Boolean {
         var isEmail = Pattern.compile("^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
                 + "((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
@@ -185,6 +186,7 @@ class AP_SDK_GlobalMethods {
         return isEmail
     }
 
+    // Get Firebase Token
     fun getDeviceToken(context : Context?) {
         FirebaseInstanceId.getInstance().instanceId.addOnCompleteListener { task ->
             if (task.isSuccessful)
@@ -194,6 +196,7 @@ class AP_SDK_GlobalMethods {
         }
     }
 
+    // Custom Snackbar from Top
     fun createSnackBar(view: View? ,message: String?){
         var snackbar = TSnackbar.make(view!!, message!!, TSnackbar.LENGTH_LONG);
         snackbar.setActionTextColor(Color.BLACK)
@@ -208,6 +211,27 @@ class AP_SDK_GlobalMethods {
         snackbar.show()
     }
 
+    // Convert EPOC Date format to Current Time Zone Format
+    fun EpochToDate(time : Long,formatString : String) : String {
+        var expiryDate = Date(time*1000L)
+        var expiryTime = SimpleDateFormat(formatString).format(expiryDate)
+
+        var currentDate = Calendar.getInstance().getTime()
+
+        var simpleDateFormat = SimpleDateFormat(formatString)
+
+        var date1 = simpleDateFormat.parse(expiryTime)
+        var date2 = simpleDateFormat.parse(SimpleDateFormat(formatString).format(currentDate))
+
+        var difference = date1.getTime() - date2.getTime()
+        var differenceInSec = difference/1000
+        var differenceInMin = differenceInSec/60
+        var expirationTime = differenceInMin.toString() + ":" +  (differenceInSec - (differenceInMin*60)).toString()
+
+        return difference.toString()
+    }
+
+    // Internet Connection check
     fun checkConnection(mContext : Context?): Boolean {
         val connectivityManager = mContext!!.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val netInfo = connectivityManager.activeNetworkInfo
