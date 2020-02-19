@@ -6,8 +6,7 @@
     android:layout_height="wrap_content"
     android:background="#ffffff"
     android:orientation="vertical"
-    app:behavior_hideable="true"
-    app:behavior_peekHeight="0dp"
+    android:layout_marginTop="@dimen/_60sdp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <ScrollView

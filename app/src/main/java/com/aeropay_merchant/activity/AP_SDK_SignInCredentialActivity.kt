@@ -1,9 +1,18 @@
 package com.aeropay_merchant.activity
 
+import AP.model.ProcessTransaction
+import android.app.Activity
+import android.app.Dialog
+import android.content.DialogInterface
+import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.util.Base64
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.Toast
 import com.aeropay_merchant.R
 import com.aeropay_merchant.Utilities.*
@@ -11,6 +20,15 @@ import com.aeropay_merchant.communication.AP_SDK_AWSConnectionManager
 import com.aeropay_merchant.communication.AP_SDK_DefineID
 import com.aeropay_merchant.view.AP_SDK_CustomEditText
 import android.widget.ImageView
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentActivity
+import com.aeropay_merchant.view.AP_SDK_CustomTextView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.earthling.atminput.ATMEditText
+import com.earthling.atminput.Currency
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 
 class AP_SDK_SignInCredentialActivity : BaseActivity(){
@@ -54,8 +72,8 @@ class AP_SDK_SignInCredentialActivity : BaseActivity(){
     fun createUserValidation(view: View) {
          userName = userNameEditAPSDK.text.toString()
          password = passwordEditAPSDK.text.toString()
-         /*userName = "daniel.muller@aeropayments.com"
-         password = "Password*12345"*/
+         userName = "daniel.muller@aeropayments.com"
+         password = "Password*12345"
 
         if(userName.trim().isNullOrEmpty() || password!!.trim().isNullOrEmpty()){
             Toast.makeText(this,"Please enter Email and password.",Toast.LENGTH_SHORT).show()

@@ -61,7 +61,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
     lateinit var headerLayout : RelativeLayout
     lateinit var beaconTransmitter: BeaconTransmitter
     lateinit var cardAdapterAPSDK: AP_SDK_HomeCardRecyclerView
-    lateinit var bottomFragment: BottomSheetDialog
+    lateinit var bottomFragment: AuthorizeSheetDialog
     lateinit var mReceiver: BroadcastReceiver
     lateinit var subscriptionWatcher: AppSyncSubscriptionCall<OnCreateMerchantSyncSubscription.Data>
     lateinit var APSDKHomeViewModel : AP_SDK_HomeViewModel
@@ -71,6 +71,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
     var isBleSupported = false
     var isBillSend = true
     var selectedPosition : Int? = -1
+    var bottomSheetPosition : Int? = -1
     val TAG = AP_SDK_SignInScreenActivity::class.java!!.getSimpleName()
     var objModelManager = AP_SDK_AeropayModelManager().getInstance()
 
@@ -85,7 +86,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
         AP_SDK_GlobalMethods().getDeviceToken(applicationContext)
         setListeners()
         maintainUserLoginCount()
-        bottomFragment = BottomSheetDialog(this)
+        bottomFragment = AuthorizeSheetDialog()
 
         var loginCount = AP_SDK_PrefKeeper.logInCount
         if(loginCount< 4){
@@ -360,10 +361,10 @@ class AP_SDK_HomeActivity : BaseActivity(){
 
                         if ((isBillSend)) {
                             var listSizeCard = objModelManager.createSyncPayloadAPSDK.payloadList.size
-                            if(bottomFragment.isShowing){
-                                bottomFragment.cancel()
+                            var tag = supportFragmentManager.findFragmentByTag("SheetFragment")
+                            if(!(tag==null)){
+                                bottomFragment.dismiss()
                             }
-
                             for (i in 0..listSizeCard - 1) {
                                 if (txnID.equals(objModelManager.createSyncPayloadAPSDK.payloadList[i].transactionId)) {
                                     isBillSend = false
@@ -405,133 +406,10 @@ class AP_SDK_HomeActivity : BaseActivity(){
 
     // On Card Adapter Click Event to open Authorize payment Screen
     fun onItemClick(position : Int,view: View) {
-         APSDKHomeViewModel.userEntered = ""
-         var view = (this as FragmentActivity).layoutInflater.inflate(com.aeropay_merchant.R.layout.ap_sdk_authorize_payment, null)
-         setValuesInDialog(view,position)
-         bottomFragment.setContentView(view)
-         bottomFragment.show()
-    }
-
-    // Set Values in Dialog and Initialize UI of Dialog
-    private fun setValuesInDialog(view: View, position: Int) {
-        var etInput = view.findViewById(com.aeropay_merchant.R.id.amountEdit) as ATMEditText
-        var userImage = view.findViewById(com.aeropay_merchant.R.id.userImage) as ImageView
-        var userName = view.findViewById(com.aeropay_merchant.R.id.userName) as AP_SDK_CustomTextView
-
-        var imm =  getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0)
-
-        userName.setText(objModelManager.createSyncPayloadAPSDK.payloadList[position].userName)
-        Glide.with(this).load(objModelManager.createSyncPayloadAPSDK.payloadList[position].profileImage).apply(
-            RequestOptions.circleCropTransform()).into(userImage)
-
-        etInput.Currency   = Currency.USA
-        etInput.setText("0")
-
-        val pinButtonHandler = View.OnClickListener { v ->
-            val pressedButton = v as AP_SDK_CustomTextView
-            APSDKHomeViewModel.userEntered = APSDKHomeViewModel.userEntered + pressedButton.text
-            etInput.setText(APSDKHomeViewModel.userEntered)
-            etInput.setTextColor(Color.BLACK)
-            etInput.setTypeface(Typeface.DEFAULT_BOLD)
-        }
-
-        var button0 = view.findViewById<View>(com.aeropay_merchant.R.id.button0) as AP_SDK_CustomTextView
-        button0!!.setOnClickListener(pinButtonHandler)
-
-        var button1 = view.findViewById<View>(com.aeropay_merchant.R.id.button1) as AP_SDK_CustomTextView
-        button1!!.setOnClickListener(pinButtonHandler)
-
-        var button2 = view.findViewById<View>(com.aeropay_merchant.R.id.button2) as AP_SDK_CustomTextView
-        button2!!.setOnClickListener(pinButtonHandler)
-
-        var button3 = view.findViewById<View>(com.aeropay_merchant.R.id.button3) as AP_SDK_CustomTextView
-        button3!!.setOnClickListener(pinButtonHandler)
-
-        var button4 = view.findViewById<View>(com.aeropay_merchant.R.id.button4) as AP_SDK_CustomTextView
-        button4!!.setOnClickListener(pinButtonHandler)
-
-        var button5 = view.findViewById<View>(com.aeropay_merchant.R.id.button5) as AP_SDK_CustomTextView
-        button5!!.setOnClickListener(pinButtonHandler)
-
-        var button6 = view.findViewById<View>(com.aeropay_merchant.R.id.button6) as AP_SDK_CustomTextView
-        button6!!.setOnClickListener(pinButtonHandler)
-
-        var button7 = view.findViewById<View>(com.aeropay_merchant.R.id.button7) as AP_SDK_CustomTextView
-        button7!!.setOnClickListener(pinButtonHandler)
-
-        var button8 = view.findViewById<View>(com.aeropay_merchant.R.id.button8) as AP_SDK_CustomTextView
-        button8!!.setOnClickListener(pinButtonHandler)
-
-        var button9 = view.findViewById<View>(com.aeropay_merchant.R.id.button9) as AP_SDK_CustomTextView
-        button9!!.setOnClickListener(pinButtonHandler)
-
-        var dropArrow = view.findViewById<View>(com.aeropay_merchant.R.id.downArrow) as ImageView
-        dropArrow!!.setOnClickListener({
-            bottomFragment.cancel()
-        })
-
-        var buttonDelete = view.findViewById<View>(com.aeropay_merchant.R.id.buttonDeleteBack) as AP_SDK_CustomTextView
-        buttonDelete!!.setOnClickListener(View.OnClickListener {
-            var userEnteredLength = APSDKHomeViewModel.userEntered!!.length
-            if(userEnteredLength == 1){
-                APSDKHomeViewModel.userEntered = APSDKHomeViewModel.userEntered!!.substring(0, APSDKHomeViewModel.userEntered!!.length - 1)
-                etInput.setText("0")
-                etInput.setTypeface(Typeface.DEFAULT_BOLD)
-                etInput.setTextColor(Color.LTGRAY)
-            }
-            else if (userEnteredLength > 1){
-                APSDKHomeViewModel.userEntered = APSDKHomeViewModel.userEntered!!.substring(0, APSDKHomeViewModel.userEntered!!.length - 1)
-                etInput.setText(APSDKHomeViewModel.userEntered)
-            }
-        }
-        )
-
-        var authorizeButton = view.findViewById<View>(com.aeropay_merchant.R.id.authoriseButton) as Button
-        authorizeButton.setOnClickListener {
-
-            var amount = etInput.text.toString()
-            var amountValueLength = amount.replace("$","").trim().length
-            if(amountValueLength > 6){
-                showMsgToast("Amount should be lesser than or equal to $500.00.")
-            }
-            else {
-                if (amount.replace("$", "").trim().toDouble() > 500.00) {
-                    showMsgToast("Amount should be lesser than or equal to $500.00.")
-                } else {
-                    var expirationTime = objModelManager.createSyncPayloadAPSDK.payloadList[position].expirationTime
-                    if(!(expirationTime.equals("0"))){
-                        if (AP_SDK_GlobalMethods().checkConnection(this)) {
-                            var processTransaction = ProcessTransaction()
-
-                            processTransaction.type = "debit"
-                            processTransaction.fromMerchant = "1".toBigDecimal()
-                            processTransaction.merchantLocationId = AP_SDK_PrefKeeper.merchantLocationId!!.toBigDecimal()
-
-                            processTransaction.transactionDescription = "Aeropay Transaction"
-                            processTransaction.amount = amount.replace("$", "").trim().toBigDecimal()
-                            processTransaction.debug = "0".toBigDecimal()
-                            processTransaction.transactionId = txnID
-
-                            APSDKHomeViewModel.userEntered = amount
-
-                            selectedPosition = position
-                            var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
-                            awsConnectionManager.hitServer(
-                                AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION,
-                                this,
-                                processTransaction
-                            )
-                        } else {
-                            showMsgToast("Please check your Internet Connection")
-                        }
-                    }
-                    else{
-                        showMsgToast("Transaction has expired.")
-                    }
-                }
-            }
-        }
+        APSDKHomeViewModel.userEntered = ""
+        bottomFragment = AuthorizeSheetDialog()
+        bottomSheetPosition = position
+        bottomFragment.show(supportFragmentManager, "SheetFragment")
     }
 
     override fun onDestroy() {
@@ -571,7 +449,10 @@ class AP_SDK_HomeActivity : BaseActivity(){
         objModelManager.APSDKSubscriptionPayloadForList.payloadList.add(createSyncPayload)
         objModelManager.APSDKSubscriptionPayloadForList.payloadList.reverse()
         setupView()
-        bottomFragment.cancel()
+        var tag = supportFragmentManager.findFragmentByTag("SheetFragment")
+        if(!(tag==null)){
+            bottomFragment.dismiss()
+        }
     }
 
     // Change UI when Transaction has expired.
@@ -594,8 +475,9 @@ class AP_SDK_HomeActivity : BaseActivity(){
         objModelManager.APSDKSubscriptionPayloadForList.payloadList.add(createSyncPayload)
         objModelManager.APSDKSubscriptionPayloadForList.payloadList.reverse()
         setupView()
-        if(bottomFragment.isShowing){
-            bottomFragment.cancel()
+        var tag = supportFragmentManager.findFragmentByTag("SheetFragment")
+        if(!(tag==null)){
+            bottomFragment.dismiss()
         }
     }
 

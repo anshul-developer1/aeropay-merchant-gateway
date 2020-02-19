@@ -9,7 +9,7 @@
 
 <androidx.cardview.widget.CardView
     android:layout_width="@dimen/_100sdp"
-    android:layout_height="@dimen/_120sdp"
+    android:layout_height="@dimen/_126sdp"
     app:cardCornerRadius="@dimen/_5sdp"
     android:id="@+id/userCardLayout"
     app:cardElevation="@dimen/_8sdp"

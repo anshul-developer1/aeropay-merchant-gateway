@@ -1,4 +1,4 @@
-apply plugin: 'com.android.library'
+apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.amazonaws.appsync'
 apply plugin: 'kotlin-android-extensions'
@@ -8,10 +8,11 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.1"
     defaultConfig {
+        applicationId "com.aeropay_merchant"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 4
-        versionName "4.0"
+        versionCode 5
+        versionName "5.0"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -42,6 +43,7 @@ dependencies {
     def multidex_version = "2.0.1"
     implementation "androidx.multidex:multidex:$multidex_version"
     implementation 'com.github.bumptech.glide:glide:4.9.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
 
     //UI Dependency
