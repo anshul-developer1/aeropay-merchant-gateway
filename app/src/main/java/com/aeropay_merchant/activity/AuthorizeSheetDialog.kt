@@ -11,6 +11,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.text.InputType
 import android.util.DisplayMetrics
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -22,6 +23,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.DialogFragment
 import com.aeropay_merchant.R
@@ -36,6 +38,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.earthling.atminput.ATMEditText
 import com.earthling.atminput.Currency
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
@@ -59,8 +62,7 @@ lateinit var mContext: AP_SDK_HomeActivity
         dialogBox.setOnShowListener { dialog ->
             setupFullHeight(dialogBox)
         }
-
-        return dialogBox;
+        return dialogBox
     }
 
     fun setupFullHeight(bottomSheetDialog : BottomSheetDialog) {
@@ -73,8 +75,20 @@ lateinit var mContext: AP_SDK_HomeActivity
             layoutParams.height = sheetHeight
         }
         bottomSheet.setLayoutParams(layoutParams)
-        bottomSheetBehavior.setSkipCollapsed(true);
-        bottomSheetBehavior.setHideable(true);
+        bottomSheetBehavior.setSkipCollapsed(false)
+        bottomSheetBehavior.setHideable(false)
+        bottomSheetBehavior.setBottomSheetCallback(object : BottomSheetCallback(){
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+
+            }
+
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_DRAGGING){
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    }
+            }
+
+        })
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED)
     }
 
@@ -87,6 +101,7 @@ lateinit var mContext: AP_SDK_HomeActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             etInput.focusable = View.NOT_FOCUSABLE
         }
+        etInput.inputType = InputType.TYPE_NULL
 
         userName.setText(mContext.objModelManager.createSyncPayloadAPSDK.payloadList[position].userName)
         Glide.with(this).load(mContext.objModelManager.createSyncPayloadAPSDK.payloadList[position].profileImage).apply(

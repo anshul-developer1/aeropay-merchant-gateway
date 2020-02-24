@@ -15,9 +15,9 @@ import kotlinx.android.synthetic.main.ap_sdk_home_recycler_layout.view.*
 import java.util.concurrent.TimeUnit
 
 
-class HomeListRecyclerView(val payerName: MutableList<AP_SDK_CreateSyncPayload>, val context: Context) : RecyclerView.Adapter<ViewHolder>() {
+class HomeListRecyclerView(var payerName: MutableList<AP_SDK_CreateSyncPayload>, val context: Context) : RecyclerView.Adapter<ViewHolder>() {
 
-    lateinit var countDownTimer: CountDownTimer
+    var countDownTimer: CountDownTimer? = null
 
     override fun getItemCount(): Int {
         return payerName.size
@@ -28,7 +28,15 @@ class HomeListRecyclerView(val payerName: MutableList<AP_SDK_CreateSyncPayload>,
     }
 
     fun stopTimer(){
-        countDownTimer.cancel()
+        countDownTimer?.cancel()
+    }
+
+    fun setValues(payerDetails: MutableList<AP_SDK_CreateSyncPayload>){
+        this.payerName = payerDetails
+        notifyDataSetChanged()
+        if(countDownTimer != null){
+            countDownTimer?.cancel()
+        }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

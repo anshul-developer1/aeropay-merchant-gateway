@@ -49,6 +49,8 @@ import java.util.*
 import kotlin.collections.HashMap
 
 
+lateinit var cardAdapterAPSDK: AP_SDK_HomeCardRecyclerView
+lateinit var homeListAdapter : HomeListRecyclerView
 
 
 class AP_SDK_HomeActivity : BaseActivity(){
@@ -60,12 +62,10 @@ class AP_SDK_HomeActivity : BaseActivity(){
     lateinit var aeropayTransparent : ImageView
     lateinit var headerLayout : RelativeLayout
     lateinit var beaconTransmitter: BeaconTransmitter
-    lateinit var cardAdapterAPSDK: AP_SDK_HomeCardRecyclerView
     lateinit var bottomFragment: AuthorizeSheetDialog
     lateinit var mReceiver: BroadcastReceiver
     lateinit var subscriptionWatcher: AppSyncSubscriptionCall<OnCreateMerchantSyncSubscription.Data>
     lateinit var APSDKHomeViewModel : AP_SDK_HomeViewModel
-    lateinit var homeListAdapter : HomeListRecyclerView
     lateinit var txnID : String
     var bleAdapter: BluetoothAdapter? = null
     var isBleSupported = false
@@ -87,6 +87,8 @@ class AP_SDK_HomeActivity : BaseActivity(){
         setListeners()
         maintainUserLoginCount()
         bottomFragment = AuthorizeSheetDialog()
+
+        var asd = AP_SDK_PrefKeeper.merchantLocationDeviceId
 
         var loginCount = AP_SDK_PrefKeeper.logInCount
         if(loginCount< 4){
@@ -144,6 +146,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
         cardAdapterAPSDK.setValues(objModelManager.createSyncPayloadAPSDK.payloadList)
         homeListAdapter = HomeListRecyclerView(objModelManager.APSDKSubscriptionPayloadForList.payloadList,this)
         listViewRecycler.adapter = homeListAdapter
+        setUIWithBT()
     }
 
     // Bluetooth Connection Handling and UI Changes
@@ -408,6 +411,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
     fun onItemClick(position : Int,view: View) {
         APSDKHomeViewModel.userEntered = ""
         bottomFragment = AuthorizeSheetDialog()
+        bottomFragment.isCancelable = false
         bottomSheetPosition = position
         bottomFragment.show(supportFragmentManager, "SheetFragment")
     }

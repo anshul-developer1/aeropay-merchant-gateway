@@ -10,6 +10,7 @@ import com.aeropay_merchant.R
 import com.aeropay_merchant.Utilities.AP_SDK_ConstantsStrings
 import com.aeropay_merchant.Utilities.AP_SDK_GlobalMethods
 import com.aeropay_merchant.Utilities.AP_SDK_PrefKeeper
+import com.aeropay_merchant.adapter.AP_SDK_HomeCardRecyclerView
 import com.aeropay_merchant.communication.AP_SDK_AWSConnectionManager
 import com.aeropay_merchant.communication.AP_SDK_DefineID
 
@@ -81,11 +82,22 @@ class AP_SDK_SettingsScreenActivity : BaseActivity() {
                         var arrayPosition = position - 1
                         (context as AP_SDK_SettingsScreenActivity).onStoreSelectedEvent(arrayPosition)
                         var objModelManager = AP_SDK_AeropayModelManager().getInstance()
+                        var listSize = objModelManager.APSDKSubscriptionPayloadForList.payloadList.size
+                        var cardSize = objModelManager.createSyncPayloadAPSDK.payloadList.size
+
                         if(!(objModelManager.createSyncPayloadAPSDK.payloadList == null)){
+                            for (i in 0..cardSize - 1) {
+                                objModelManager.createSyncPayloadAPSDK.payloadList[i].expirationTime = "0"
+                            }
                             objModelManager.createSyncPayloadAPSDK.payloadList.clear()
+                            cardAdapterAPSDK.setValues(objModelManager.createSyncPayloadAPSDK.payloadList)
                         }
                         if(!(objModelManager.APSDKSubscriptionPayloadForList.payloadList == null)){
+                            for (i in 0..listSize - 1) {
+                                objModelManager.APSDKSubscriptionPayloadForList.payloadList[i].expirationTime = "0"
+                            }
                             objModelManager.APSDKSubscriptionPayloadForList.payloadList.clear()
+                            homeListAdapter.setValues(objModelManager.APSDKSubscriptionPayloadForList.payloadList)
                         }
                     }
                 }

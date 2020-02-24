@@ -8,8 +8,8 @@
     android:background="@drawable/ap_sdk_card_drawable">
 
 <androidx.cardview.widget.CardView
-    android:layout_width="@dimen/_100sdp"
-    android:layout_height="@dimen/_126sdp"
+    android:layout_width="@dimen/_110sdp"
+    android:layout_height="@dimen/_130sdp"
     app:cardCornerRadius="@dimen/_5sdp"
     android:id="@+id/userCardLayout"
     app:cardElevation="@dimen/_8sdp"
@@ -47,6 +47,7 @@
             android:layout_height="wrap_content"
             android:textSize="@dimen/_12ssp"
             android:textColor="#adadad"
+            android:text="01:55 s"
             android:gravity="center"
             android:layout_marginBottom="@dimen/_5sdp"
             android:layout_centerHorizontal="true"
