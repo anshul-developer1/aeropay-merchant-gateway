@@ -82,10 +82,9 @@ class AP_SDK_SettingsScreenActivity : BaseActivity() {
                         var arrayPosition = position - 1
                         (context as AP_SDK_SettingsScreenActivity).onStoreSelectedEvent(arrayPosition)
                         var objModelManager = AP_SDK_AeropayModelManager().getInstance()
-                        var listSize = objModelManager.APSDKSubscriptionPayloadForList.payloadList.size
-                        var cardSize = objModelManager.createSyncPayloadAPSDK.payloadList.size
 
                         if(!(objModelManager.createSyncPayloadAPSDK.payloadList == null)){
+                            var cardSize = objModelManager.createSyncPayloadAPSDK.payloadList.size
                             for (i in 0..cardSize - 1) {
                                 objModelManager.createSyncPayloadAPSDK.payloadList[i].expirationTime = "0"
                             }
@@ -93,6 +92,7 @@ class AP_SDK_SettingsScreenActivity : BaseActivity() {
                             cardAdapterAPSDK.setValues(objModelManager.createSyncPayloadAPSDK.payloadList)
                         }
                         if(!(objModelManager.APSDKSubscriptionPayloadForList.payloadList == null)){
+                            var listSize = objModelManager.APSDKSubscriptionPayloadForList.payloadList.size
                             for (i in 0..listSize - 1) {
                                 objModelManager.APSDKSubscriptionPayloadForList.payloadList[i].expirationTime = "0"
                             }
