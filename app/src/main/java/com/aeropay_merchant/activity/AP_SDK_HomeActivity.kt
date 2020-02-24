@@ -428,7 +428,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
         var inProgressUserDetail = objModelManager.createSyncPayloadAPSDK.payloadList[selectedPosition!!]
         var expirationTime = inProgressUserDetail.expirationTime
         objModelManager.createSyncPayloadAPSDK.payloadList[selectedPosition!!].expirationTime = "0"
-        objModelManager.createSyncPayloadAPSDK.payloadList.removeAt(selectedPosition!!)
+        objModelManager.createSyncPayloadAPSDK.payloadList.removeAt(!!)
         cardAdapterAPSDK.setValues(objModelManager.createSyncPayloadAPSDK.payloadList)
 
         APSDKHomeViewModel.numberOfConsumers = APSDKHomeViewModel.numberOfConsumers!! - 1
