@@ -118,7 +118,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
             AP_SDK_GlobalMethods().createSnackBar(headerLayout,"Device not supported BLE")
         }
         else{
-            setUIWithBT()
+            //setUIWithBT()
             startSubscription()
         }
     }
@@ -157,6 +157,8 @@ class AP_SDK_HomeActivity : BaseActivity(){
                 if(isBleEnabled!!){
                     isBleSupported = true
                     if(AP_SDK_PrefKeeper.minorId == -1){
+                        var text = "<font color=#06dab3>"+ APSDKHomeViewModel.numberOfConsumers.toString() +"</font> <font color=#232323>ready to pay : </font>" +  "<font color=#06dab3>"+ AP_SDK_PrefKeeper.deviceName
+                        readyToPay.setText(Html.fromHtml(text))
                         createHitForUUID()
                     }
                     else{
@@ -238,10 +240,12 @@ class AP_SDK_HomeActivity : BaseActivity(){
     fun creatBeaconTransmission(){
         var registerMerchantDevice = AP_SDK_AeropayModelManager().getInstance().APSDKRegisterMerchantDevices
 
+
         AP_SDK_PrefKeeper.deviceUuid = registerMerchantDevice.uuid as String
         AP_SDK_PrefKeeper.majorId = registerMerchantDevice.majorID.toInt()
         AP_SDK_PrefKeeper.minorId = registerMerchantDevice.minorID.toInt()
 
+        AP_SDK_GlobalMethods().createSnackBar(headerLayout,"BLE connection successful")
         startSharedAdvertisingBeaconWithString(registerMerchantDevice.uuid as String, registerMerchantDevice.majorID.toInt() , registerMerchantDevice.minorID.toInt(), "AP Stores")
     }
 
@@ -265,7 +269,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
                 }
 
                 override fun onStartSuccess(settingsInEffect: AdvertiseSettings) {
-                    AP_SDK_GlobalMethods().createSnackBar(headerLayout,"BLE connection successful")
+
                 }
             })
         }
@@ -416,9 +420,13 @@ class AP_SDK_HomeActivity : BaseActivity(){
         bottomFragment.show(supportFragmentManager, "SheetFragment")
     }
 
+    override fun onStop() {
+        stopSharedAdvertisingBeacon()
+        super.onStop()
+    }
+
     override fun onDestroy() {
         unregisterReceiver(mReceiver)
-        stopSharedAdvertisingBeacon()
         Log.d("Yeahh" ,"Success")
         super.onDestroy()
     }
