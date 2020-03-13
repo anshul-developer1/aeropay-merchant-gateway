@@ -1,17 +1,14 @@
 package com.aeropay_merchant.activity
 
-import AeroPayDevClient.model.MerchantLocationDevices
 import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.*
-import com.aeropay_merchant.BuildConfig
 import com.aeropay_merchant.Model.AP_SDK_AeropayModelManager
 import com.aeropay_merchant.R
 import com.aeropay_merchant.Utilities.AP_SDK_ConstantsStrings
 import com.aeropay_merchant.Utilities.AP_SDK_GlobalMethods
 import com.aeropay_merchant.Utilities.AP_SDK_PrefKeeper
-import com.aeropay_merchant.adapter.AP_SDK_HomeCardRecyclerView
 import com.aeropay_merchant.communication.AP_SDK_AWSConnectionManager
 import com.aeropay_merchant.communication.AP_SDK_DefineID
 
@@ -163,7 +160,7 @@ class AP_SDK_SettingsScreenActivity : BaseActivity() {
         if(AP_SDK_GlobalMethods().checkConnection(this)){
             var objModelManager = AP_SDK_AeropayModelManager().getInstance()
 
-            if(BuildConfig.FLAVOR.equals("stage")){
+          /*  if(BuildConfig.FLAVOR.equals("stage")){
                 var merchantLocation = AP.model.MerchantLocationDevices()
                 var merchantLocationValue = objModelManager.merchantLocationsModelAPSDK.locations[position].merchantLocationId as Double
 
@@ -181,7 +178,7 @@ class AP_SDK_SettingsScreenActivity : BaseActivity() {
                 var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
                 awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_DEVICES,this,merchantLocation)
             }
-            else if(BuildConfig.FLAVOR.equals("prod")){
+            else if(BuildConfig.FLAVOR.equals("prod")){*/
                 var merchantLocation = AeropayProdClient.model.MerchantLocationDevices()
                 var merchantLocationValue = objModelManager.merchantLocationsModelAPSDK.locations[position].merchantLocationId as Double
 
@@ -189,7 +186,7 @@ class AP_SDK_SettingsScreenActivity : BaseActivity() {
 
                 var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
                 awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_DEVICES,this,merchantLocation)
-            }
+       //     }
         }
         else{
             showMsgToast("Please check your Internet Connection")

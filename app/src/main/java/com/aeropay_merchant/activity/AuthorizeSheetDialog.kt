@@ -177,7 +177,7 @@ lateinit var mContext: AP_SDK_HomeActivity
                         var expirationTime = mContext.objModelManager.createSyncPayloadAPSDK.payloadList[position].expirationTime
                         if(!(expirationTime.equals("0"))){
                             if (AP_SDK_GlobalMethods().checkConnection(context as AP_SDK_HomeActivity)) {
-                                if(BuildConfig.FLAVOR.equals("stage")){
+                               /* if(BuildConfig.FLAVOR.equals("stage")){
                                     var processTransaction = AP.model.ProcessTransaction()
 
                                     processTransaction.type = "debit"
@@ -213,7 +213,7 @@ lateinit var mContext: AP_SDK_HomeActivity
                                     var awsConnectionManager = AP_SDK_AWSConnectionManager(context as AP_SDK_HomeActivity)
                                     awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION, context as AP_SDK_HomeActivity, processTransaction)
                                 }
-                                else if(BuildConfig.FLAVOR.equals("prod")){
+                                else if(BuildConfig.FLAVOR.equals("prod")){*/
                                     var processTransaction = AeropayProdClient.model.ProcessTransaction()
 
                                     processTransaction.type = "debit"
@@ -230,7 +230,7 @@ lateinit var mContext: AP_SDK_HomeActivity
                                     mContext.selectedPosition = position
                                     var awsConnectionManager = AP_SDK_AWSConnectionManager(context as AP_SDK_HomeActivity)
                                     awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION, context as AP_SDK_HomeActivity, processTransaction)
-                                }
+                            //    }
 
                             } else {
                                 (context as AP_SDK_HomeActivity).showMsgToast("Please check your Internet Connection")

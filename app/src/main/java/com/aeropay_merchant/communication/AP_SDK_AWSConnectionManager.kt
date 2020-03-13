@@ -16,6 +16,7 @@ import android.content.pm.ActivityInfo
 import android.app.Activity
 import android.content.res.Configuration
 import com.aeropay_merchant.Model.*
+import com.aeropay_merchant.Utilities.AP_SDK_ConstantsStrings
 import com.amazonaws.mobileconnectors.apigateway.ApiClientFactory
 import java.lang.Exception
 
@@ -41,10 +42,10 @@ class AP_SDK_AWSConnectionManager  {
 
                 try {
                     var credentialsProvider = object : CognitoCachingCredentialsProvider(mContext,
-                        com.aeropay_merchant.BuildConfig.aws_identitypool_id, Regions.US_EAST_1) {}
+                        AP_SDK_ConstantsStrings().aws_identitypool_id, Regions.US_EAST_1) {}
 
                     var logins = HashMap<String, String>()
-                    logins.put(com.aeropay_merchant.BuildConfig.userPoolLoginType, idToken);
+                    logins.put(AP_SDK_ConstantsStrings().userPoolLoginType, idToken);
                     credentialsProvider.setLogins(logins)
 
                     var factory = object : ApiClientFactory() {}.credentialsProvider(credentialsProvider)
@@ -52,7 +53,7 @@ class AP_SDK_AWSConnectionManager  {
                     var client : Any? = null
                     var output: Any? = null
 
-                    if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("stage")){
+                   /* if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("stage")){
                         client = factory.build(AeroPayStagingClient::class.java)
                         if (requestID.equals(AP_SDK_DefineID().FETCH_MERCHANT_PROFILE)) {
                             output = client.fetchMerchantPost()
@@ -86,7 +87,7 @@ class AP_SDK_AWSConnectionManager  {
                             output = client.sendBillTransactionPost(processTransaction)
                         }
                     }
-                    else if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("prod")){
+                    else if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("prod")){*/
                         client = factory.build(AeroPayProdClient::class.java)
                         if (requestID.equals(AP_SDK_DefineID().FETCH_MERCHANT_PROFILE)) {
                             output = client.fetchMerchantPost()
@@ -102,7 +103,7 @@ class AP_SDK_AWSConnectionManager  {
                             var processTransaction = requestObject as AeropayProdClient.model.ProcessTransaction
                             output = client.sendBillTransactionPost(processTransaction)
                         }
-                    }
+                  //  }
 
                     return output as Any
                 }
@@ -117,7 +118,7 @@ class AP_SDK_AWSConnectionManager  {
                 if (result != null) {
                     var objModelManager = AP_SDK_AeropayModelManager().getInstance()
                     if (requestID.equals(AP_SDK_DefineID().FETCH_MERCHANT_PROFILE)) {
-                        if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("stage")){
+                       /* if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("stage")){
                             var output = result as AP.model.MerchantResponse
                             var statusCode = output.success.toString()
                             if (statusCode.equals("1")) {
@@ -147,7 +148,7 @@ class AP_SDK_AWSConnectionManager  {
                                 callbackHandlerAPSDK.onFailure(requestID, errorMessage)
                             }
                         }
-                        else if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("prod")){
+                        else if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("prod")){*/
                             var output = result as AeropayProdClient.model.MerchantResponse
                             var statusCode = output.success.toString()
                             if (statusCode.equals("1")) {
@@ -161,9 +162,9 @@ class AP_SDK_AWSConnectionManager  {
                                 var errorMessage = output.error.toString()
                                 callbackHandlerAPSDK.onFailure(requestID, errorMessage)
                             }
-                        }
+                       // }
                     } else if (requestID.equals(AP_SDK_DefineID().FETCH_MERCHANT_LOCATIONS)) {
-                        if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("stage")){
+                      /*  if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("stage")){
                             var output = result as AP.model.MerchantLocationsResponse
                             var statusCode = output.success.toString()
                             if (statusCode.equals("1")) {
@@ -191,7 +192,7 @@ class AP_SDK_AWSConnectionManager  {
                                 callbackHandlerAPSDK.onFailure(requestID, "API Failure")
                             }
                         }
-                        else if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("prod")){
+                        else if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("prod")){*/
                             var output = result as AeropayProdClient.model.MerchantLocationsResponse
                             var statusCode = output.success.toString()
                             if (statusCode.equals("1")) {
@@ -204,9 +205,9 @@ class AP_SDK_AWSConnectionManager  {
                             } else {
                                 callbackHandlerAPSDK.onFailure(requestID, "API Failure")
                             }
-                        }
+                     //   }
                     } else if (requestID.equals(AP_SDK_DefineID().FETCH_MERCHANT_DEVICES)) {
-                        if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("stage")){
+                      /*  if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("stage")){
                             var output = result as AP.model.MerchantLocationDevicesResponse
                             var statusCode = output.success.toString()
                             if (statusCode.equals("1")) {
@@ -234,7 +235,7 @@ class AP_SDK_AWSConnectionManager  {
                                 callbackHandlerAPSDK.onFailure(requestID, "API Failure")
                             }
                         }
-                        else if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("prod")){
+                        else if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("prod")){*/
                             var output = result as AeropayProdClient.model.MerchantLocationDevicesResponse
                             var statusCode = output.success.toString()
                             if (statusCode.equals("1")) {
@@ -247,10 +248,10 @@ class AP_SDK_AWSConnectionManager  {
                             } else {
                                 callbackHandlerAPSDK.onFailure(requestID, "API Failure")
                             }
-                        }
+                      //  }
 
                     } else if (requestID.equals(AP_SDK_DefineID().REGISTER_MERCHANT_LOCATION_DEVICE)) {
-                        if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("stage")){
+                      /*  if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("stage")){
                             var output = result as AP.model.RegisterMerchantDeviceResponse
                             var statusCode = output.success.toString()
                             if (statusCode.equals("1")) {
@@ -280,7 +281,7 @@ class AP_SDK_AWSConnectionManager  {
                                 callbackHandlerAPSDK.onFailure(requestID, errorMessage)
                             }
                         }
-                        else if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("prod")){
+                        else if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("prod")){*/
                             var output = result as AeropayProdClient.model.RegisterMerchantDeviceResponse
                             var statusCode = output.success.toString()
                             if (statusCode.equals("1")) {
@@ -294,11 +295,10 @@ class AP_SDK_AWSConnectionManager  {
                                 var errorMessage = output.error.toString()
                                 callbackHandlerAPSDK.onFailure(requestID, errorMessage)
                             }
-                        }
-
+                       // }
 
                     } else if (requestID.equals(AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION)) {
-                        if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("stage")){
+                      /*  if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("stage")){
                             var output = result as AP.model.StandardResponse
                             var statusCode = output.success.toString()
                             if (statusCode.equals("1")) {
@@ -318,7 +318,7 @@ class AP_SDK_AWSConnectionManager  {
                                 callbackHandlerAPSDK.onFailure(requestID, errorMessage)
                             }
                         }
-                        else if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("prod")){
+                        else if(com.aeropay_merchant.BuildConfig.FLAVOR.equals("prod")){*/
                             var output = result as AeropayProdClient.model.StandardResponse
                             var statusCode = output.success.toString()
                             if (statusCode.equals("1")) {
@@ -327,7 +327,7 @@ class AP_SDK_AWSConnectionManager  {
                                 var errorMessage = output.error.toString()
                                 callbackHandlerAPSDK.onFailure(requestID, errorMessage)
                             }
-                        }
+                     //   }
                     }
                     unlockScreenOrientation()
                 }

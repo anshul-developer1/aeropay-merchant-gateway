@@ -20,7 +20,6 @@ import android.bluetooth.le.AdvertiseSettings
 import android.content.*
 import android.util.Log
 import android.widget.*
-import com.aeropay_merchant.BuildConfig
 import com.aeropay_merchant.Model.AP_SDK_CreateSyncPayload
 import com.aeropay_merchant.Utilities.*
 import com.aeropay_merchant.ViewModel.AP_SDK_HomeViewModel
@@ -173,7 +172,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
     fun createHitForUUID(){
         if(AP_SDK_GlobalMethods().checkConnection(this)){
 
-            if(BuildConfig.FLAVOR.equals("stage")){
+          /*  if(BuildConfig.FLAVOR.equals("stage")){
                 var registerMerchant = AP.model.RegisterMerchantDevice()
                 var deviceIntValue = AP_SDK_PrefKeeper.merchantDeviceId
                 var deviceIdValue = deviceIntValue!!.toBigDecimal()
@@ -195,7 +194,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
                 var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
                 awsConnectionManager.hitServer(AP_SDK_DefineID().REGISTER_MERCHANT_LOCATION_DEVICE,this,registerMerchant)
             }
-            else if(BuildConfig.FLAVOR.equals("prod")){
+            else if(BuildConfig.FLAVOR.equals("prod")){*/
                 var registerMerchant = AeropayProdClient.model.RegisterMerchantDevice()
                 var deviceIntValue = AP_SDK_PrefKeeper.merchantDeviceId
                 var deviceIdValue = deviceIntValue!!.toBigDecimal()
@@ -205,7 +204,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
 
                 var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
                 awsConnectionManager.hitServer(AP_SDK_DefineID().REGISTER_MERCHANT_LOCATION_DEVICE,this,registerMerchant)
-            }
+       //     }
         }
         else{
             showMsgToast("Please check your Internet Connection")

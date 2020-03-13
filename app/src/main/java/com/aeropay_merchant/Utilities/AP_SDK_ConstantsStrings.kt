@@ -14,7 +14,7 @@ class AP_SDK_ConstantsStrings {
     val aws_userpool_id = "us-east-1_nhF9sTRVD"
     val aws_identitypool_id = "us-east-1:53a53b4e-f09c-48ed-b8d2-a9927d0e9c8f"
     val aws_client_id = "7ke1nu5v271jb6hdqv8n551g5j"
-    val userPoolLoginType = "cognito-idp.us-east-1.amazonaws.com/us-east-1_nhF9sTRVD"
+    val userPoolLoginType = "cognito-idp.us-east-1.amazonaws.com/us-east-1_nhF9sTRVD"*/
 
 
       ///AWS Cognito Login Keys prod
@@ -22,7 +22,7 @@ class AP_SDK_ConstantsStrings {
     val aws_userpool_id = "us-east-1_fWjpODvHX"
     val aws_identitypool_id = "us-east-1:277ae1ce-f62f-487c-bf67-f71cb223046d"
     val aws_client_id = "25cf2riiu0dqmerana7138b3bs"
-    val userPoolLoginType = "cognito-idp.us-east-1.amazonaws.com/us-east-1_fWjpODvHX"*/
+    val userPoolLoginType = "cognito-idp.us-east-1.amazonaws.com/us-east-1_fWjpODvHX"
 
 
     //// SharePreferences Key
