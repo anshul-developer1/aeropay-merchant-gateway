@@ -35,7 +35,7 @@ class AP_SDK_GlobalMethods {
 
     fun userCognitoLoginHandler(context: Context?, view: View?, userName: String, password: String)
     {
-        var cognitoUserPool = CognitoUserPool(context, AP_SDK_ConstantsStrings().aws_userpool_id, AP_SDK_ConstantsStrings().aws_client_id, AP_SDK_ConstantsStrings().aws_client_secret_id,  Regions.US_EAST_1)
+        var cognitoUserPool = CognitoUserPool(context, com.aeropay_merchant.BuildConfig.aws_userpool_id, com.aeropay_merchant.BuildConfig.aws_client_id, com.aeropay_merchant.BuildConfig.aws_client_secret_id,  Regions.US_EAST_1)
         var cognitoUser = cognitoUserPool.getUser()
 
         var authentication = object : AuthenticationHandler {
@@ -126,7 +126,7 @@ class AP_SDK_GlobalMethods {
     }
 
     fun autoLoginAction(context : Context?,username : String, password: String, isEntryPoint : String){
-        var cognitoUserPool = CognitoUserPool(context, AP_SDK_ConstantsStrings().aws_userpool_id, AP_SDK_ConstantsStrings().aws_client_id, AP_SDK_ConstantsStrings().aws_client_secret_id,  Regions.US_EAST_1)
+        var cognitoUserPool = CognitoUserPool(context, com.aeropay_merchant.BuildConfig.aws_userpool_id, com.aeropay_merchant.BuildConfig.aws_client_id, com.aeropay_merchant.BuildConfig.aws_client_secret_id,  Regions.US_EAST_1)
         var cognitoUser = cognitoUserPool.getUser()
 
         var authentication = object : AuthenticationHandler {

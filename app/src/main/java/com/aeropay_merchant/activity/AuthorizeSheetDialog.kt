@@ -1,35 +1,24 @@
 package com.aeropay_merchant.activity
 
 
-import AP.model.ProcessTransaction
-import android.app.Activity
+import AeroPayDevClient.model.ProcessTransaction
 import android.app.Dialog
-import android.content.Context
-import android.content.DialogInterface
-import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
-import android.util.DisplayMetrics
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.TextView
-import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.fragment.app.DialogFragment
+import com.aeropay_merchant.BuildConfig
 import com.aeropay_merchant.R
 import com.aeropay_merchant.Utilities.AP_SDK_GlobalMethods
 import com.aeropay_merchant.Utilities.AP_SDK_PrefKeeper
-import com.aeropay_merchant.ViewModel.AP_SDK_HomeViewModel
 import com.aeropay_merchant.communication.AP_SDK_AWSConnectionManager
 import com.aeropay_merchant.communication.AP_SDK_DefineID
 import com.aeropay_merchant.view.AP_SDK_CustomTextView
@@ -188,22 +177,61 @@ lateinit var mContext: AP_SDK_HomeActivity
                         var expirationTime = mContext.objModelManager.createSyncPayloadAPSDK.payloadList[position].expirationTime
                         if(!(expirationTime.equals("0"))){
                             if (AP_SDK_GlobalMethods().checkConnection(context as AP_SDK_HomeActivity)) {
-                                var processTransaction = ProcessTransaction()
+                                if(BuildConfig.FLAVOR.equals("stage")){
+                                    var processTransaction = AP.model.ProcessTransaction()
 
-                                processTransaction.type = "debit"
-                                processTransaction.fromMerchant = "1".toBigDecimal()
-                                processTransaction.merchantLocationId = AP_SDK_PrefKeeper.merchantLocationId!!.toBigDecimal()
+                                    processTransaction.type = "debit"
+                                    processTransaction.fromMerchant = "1".toBigDecimal()
+                                    processTransaction.merchantLocationId = AP_SDK_PrefKeeper.merchantLocationId!!.toBigDecimal()
 
-                                processTransaction.transactionDescription = "Aeropay Transaction"
-                                processTransaction.amount = amount.replace("$", "").trim().toBigDecimal()
-                                processTransaction.debug = "0".toBigDecimal()
-                                processTransaction.transactionId = mContext.txnID
+                                    processTransaction.transactionDescription = "Aeropay Transaction"
+                                    processTransaction.amount = amount.replace("$", "").trim().toBigDecimal()
+                                    processTransaction.debug = "0".toBigDecimal()
+                                    processTransaction.transactionId = mContext.txnID
 
-                                mContext.APSDKHomeViewModel.userEntered = amount
+                                    mContext.APSDKHomeViewModel.userEntered = amount
 
-                                mContext.selectedPosition = position
-                                var awsConnectionManager = AP_SDK_AWSConnectionManager(context as AP_SDK_HomeActivity)
-                                awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION, context as AP_SDK_HomeActivity, processTransaction)
+                                    mContext.selectedPosition = position
+                                    var awsConnectionManager = AP_SDK_AWSConnectionManager(context as AP_SDK_HomeActivity)
+                                    awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION, context as AP_SDK_HomeActivity, processTransaction)
+                                }
+                                else if(BuildConfig.FLAVOR.equals("dev")){
+                                    var processTransaction = ProcessTransaction()
+
+                                    processTransaction.type = "debit"
+                                    processTransaction.fromMerchant = "1".toBigDecimal()
+                                    processTransaction.merchantLocationId = AP_SDK_PrefKeeper.merchantLocationId!!.toBigDecimal()
+
+                                    processTransaction.transactionDescription = "Aeropay Transaction"
+                                    processTransaction.amount = amount.replace("$", "").trim().toBigDecimal()
+                                    processTransaction.debug = "0".toBigDecimal()
+                                    processTransaction.transactionId = mContext.txnID
+
+                                    mContext.APSDKHomeViewModel.userEntered = amount
+
+                                    mContext.selectedPosition = position
+                                    var awsConnectionManager = AP_SDK_AWSConnectionManager(context as AP_SDK_HomeActivity)
+                                    awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION, context as AP_SDK_HomeActivity, processTransaction)
+                                }
+                                else if(BuildConfig.FLAVOR.equals("prod")){
+                                    var processTransaction = AeropayProdClient.model.ProcessTransaction()
+
+                                    processTransaction.type = "debit"
+                                    processTransaction.fromMerchant = "1".toBigDecimal()
+                                    processTransaction.merchantLocationId = AP_SDK_PrefKeeper.merchantLocationId!!.toBigDecimal()
+
+                                    processTransaction.transactionDescription = "Aeropay Transaction"
+                                    processTransaction.amount = amount.replace("$", "").trim().toBigDecimal()
+                                    processTransaction.debug = "0".toBigDecimal()
+                                    processTransaction.transactionId = mContext.txnID
+
+                                    mContext.APSDKHomeViewModel.userEntered = amount
+
+                                    mContext.selectedPosition = position
+                                    var awsConnectionManager = AP_SDK_AWSConnectionManager(context as AP_SDK_HomeActivity)
+                                    awsConnectionManager.hitServer(AP_SDK_DefineID().FETCH_MERCHANT_PROCESS_TRANSACTION, context as AP_SDK_HomeActivity, processTransaction)
+                                }
+
                             } else {
                                 (context as AP_SDK_HomeActivity).showMsgToast("Please check your Internet Connection")
                             }

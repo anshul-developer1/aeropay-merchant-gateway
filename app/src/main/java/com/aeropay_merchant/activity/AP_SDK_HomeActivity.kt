@@ -1,9 +1,7 @@
 package com.aeropay_merchant.activity
 
 
-import AP.model.ProcessTransaction
-import AP.model.RegisterMerchantDevice
-import android.app.Activity
+import AeroPayDevClient.model.RegisterMerchantDevice
 import android.os.Bundle
 import android.text.Html
 import android.view.View
@@ -20,33 +18,18 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.le.AdvertiseCallback
 import android.bluetooth.le.AdvertiseSettings
 import android.content.*
-import android.content.res.Configuration
-import android.graphics.Color
-import android.graphics.Typeface
 import android.util.Log
-import android.view.inputmethod.InputMethodManager
 import android.widget.*
-import androidx.fragment.app.FragmentActivity
+import com.aeropay_merchant.BuildConfig
 import com.aeropay_merchant.Model.AP_SDK_CreateSyncPayload
-import com.aeropay_merchant.Model.AP_SDK_FetchMerchantProfileModel
 import com.aeropay_merchant.Utilities.*
 import com.aeropay_merchant.ViewModel.AP_SDK_HomeViewModel
 import com.aeropay_merchant.adapter.AP_SDK_HomeCardRecyclerView
-import com.aeropay_merchant.view.AP_SDK_CustomTextView
 import com.amazonaws.amplify.generated.graphql.OnCreateMerchantSyncSubscription
 import com.amazonaws.mobileconnectors.appsync.AppSyncSubscriptionCall
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
-import com.earthling.atminput.ATMEditText
-import com.earthling.atminput.Currency
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
-import okhttp3.internal.format
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.HashMap
 
 
 lateinit var cardAdapterAPSDK: AP_SDK_HomeCardRecyclerView
@@ -118,8 +101,8 @@ class AP_SDK_HomeActivity : BaseActivity(){
             AP_SDK_GlobalMethods().createSnackBar(headerLayout,"Device not supported BLE")
         }
         else{
-            //setUIWithBT()
-            startSubscription()
+            setUIWithBT()
+            //startSubscription()
         }
     }
 
@@ -189,15 +172,40 @@ class AP_SDK_HomeActivity : BaseActivity(){
     // Registering Merchant Device and Request for UUID of Device
     fun createHitForUUID(){
         if(AP_SDK_GlobalMethods().checkConnection(this)){
-            var registerMerchant = RegisterMerchantDevice()
-            var deviceIntValue = AP_SDK_PrefKeeper.merchantDeviceId
-            var deviceIdValue = deviceIntValue!!.toBigDecimal()
 
-            registerMerchant.deviceId =  deviceIdValue
-            registerMerchant.token = AP_SDK_PrefKeeper.deviceToken
+            if(BuildConfig.FLAVOR.equals("stage")){
+                var registerMerchant = AP.model.RegisterMerchantDevice()
+                var deviceIntValue = AP_SDK_PrefKeeper.merchantDeviceId
+                var deviceIdValue = deviceIntValue!!.toBigDecimal()
 
-            var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
-            awsConnectionManager.hitServer(AP_SDK_DefineID().REGISTER_MERCHANT_LOCATION_DEVICE,this,registerMerchant)
+                registerMerchant.deviceId =  deviceIdValue
+                registerMerchant.token = AP_SDK_PrefKeeper.deviceToken
+
+                var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
+                awsConnectionManager.hitServer(AP_SDK_DefineID().REGISTER_MERCHANT_LOCATION_DEVICE,this,registerMerchant)
+            }
+            else if(BuildConfig.FLAVOR.equals("dev")){
+                var registerMerchant = RegisterMerchantDevice()
+                var deviceIntValue = AP_SDK_PrefKeeper.merchantDeviceId
+                var deviceIdValue = deviceIntValue!!.toBigDecimal()
+
+                registerMerchant.deviceId =  deviceIdValue
+                registerMerchant.token = AP_SDK_PrefKeeper.deviceToken
+
+                var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
+                awsConnectionManager.hitServer(AP_SDK_DefineID().REGISTER_MERCHANT_LOCATION_DEVICE,this,registerMerchant)
+            }
+            else if(BuildConfig.FLAVOR.equals("prod")){
+                var registerMerchant = AeropayProdClient.model.RegisterMerchantDevice()
+                var deviceIntValue = AP_SDK_PrefKeeper.merchantDeviceId
+                var deviceIdValue = deviceIntValue!!.toBigDecimal()
+
+                registerMerchant.deviceId =  deviceIdValue
+                registerMerchant.token = AP_SDK_PrefKeeper.deviceToken
+
+                var awsConnectionManager = AP_SDK_AWSConnectionManager(this)
+                awsConnectionManager.hitServer(AP_SDK_DefineID().REGISTER_MERCHANT_LOCATION_DEVICE,this,registerMerchant)
+            }
         }
         else{
             showMsgToast("Please check your Internet Connection")
@@ -269,7 +277,7 @@ class AP_SDK_HomeActivity : BaseActivity(){
                 }
 
                 override fun onStartSuccess(settingsInEffect: AdvertiseSettings) {
-
+                    startSubscription()
                 }
             })
         }
